@@ -1,0 +1,9 @@
+{
+    "require-dev": {
+        "symfony/var-dumper": "^5.4"
+    },
+    "require": {
+        "twig/twig": "^3.0",
+        "altorouter/altorouter": "^2.0"
+    }
+}
