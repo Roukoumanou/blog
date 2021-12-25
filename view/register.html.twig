@@ -1,0 +1,33 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <h1>{{ title }}</h1>
+    <form method="post" action='/register'>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="inputFirstName" class="form-label">Votre Nom</label>
+                <input type="text" name="firstName" class="form-control" id="inputFirstName" required aria-describedby="firstNameHelp">
+            </div>
+            <div class="col-md-6">
+                <label for="inputLastName" class="form-label">Votre PréNom</label>
+                <input type="text" name="lastName" class="form-control" id="inputLastName" required aria-describedby="lastNameHelp">
+            </div>
+        </div>
+        <div class="mb-3">
+          <label for="inputEmail1" class="form-label">Votre Adresse Email</label>
+          <input type="email" name="email" pattern="[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{1,63}$" title="Veuillez entrer un e-mail valide" class="form-control" id="inputEmail1" required aria-describedby="emailHelp">
+          <div id="emailHelp" class="form-text">Nous ne partagerons jamais votre e-mail avec quelqu'un d'autre.</div>
+        </div>
+        <div class="mb-3">
+          <label for="inputPassword1" class="form-label">Votre Mot De Passe</label>
+          <input type="password" name="password" class="form-control" id="inputPassword1" required>
+        </div>
+        <div class="mb-3 form-check">
+          <input type="checkbox" name="condition" class="form-check-input" id="exampleCheck1" required>
+          <label class="form-check-label" for="exampleCheck1">Accepter les conditions</label>
+        </div>
+        <button type="submit" class="btn btn-primary">S'inscrire</button>
+    </form>
+{% endblock %}
