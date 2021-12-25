@@ -1,7 +1,9 @@
 # p5 Création d'un blog en php
 
-run composer install
+RUN composer update
 
-run yarn install
+RUN yarn install
 
-run php -S localhost:8001
+RUN sass assets/scss/styles.scss:public/css/styles.css
+
+RUN php -S localhost:8000 -t public
