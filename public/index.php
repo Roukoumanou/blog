@@ -1,8 +1,8 @@
 <?php
-
-require_once 'vendor/autoload.php';
-require_once 'config/router.php';
-
+session_start();
+require dirname(__DIR__).'/vendor/autoload.php';
+require dirname(__DIR__).'/config/router.php';
+use App\Controller\Exception\ExceptionController;
 $match = $router->match();
 
 if (!\is_null($match) && !\is_bool($match)) {
@@ -12,5 +12,5 @@ if (!\is_null($match) && !\is_bool($match)) {
         $params = $match['params'];
     }
 }else {
-    include 'view/_partials/404.html.twig';
+    (new ExceptionController())->error404();
 }
