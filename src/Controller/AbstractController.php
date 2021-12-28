@@ -1,5 +1,5 @@
 <?php 
-require_once '../config/router.php';
+namespace App\Controller;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
@@ -16,6 +16,7 @@ abstract class AbstractController
     {
         $loader = new \Twig\Loader\FilesystemLoader('../view/');
         $twig = new \Twig\Environment($loader);
+        $twig->addGlobal('app', $_SESSION);
 
         echo $twig->render($tmp, $option);
     }

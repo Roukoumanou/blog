@@ -1,4 +1,7 @@
 <?php 
+namespace App\Controller\Administrator;
+
+use App\Controller\AbstractController;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>

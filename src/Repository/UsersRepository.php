@@ -1,6 +1,9 @@
-<?php 
-require_once 'DB.php';
-require_once '../Entity/Users.php';
+<?php
+namespace App\Repository;
+
+use App\Entity\Users;
+use App\Repository\DB;
+use \PDO;
 
 class UsersRepository extends DB
 {
@@ -17,7 +20,7 @@ class UsersRepository extends DB
             'images_id' => 1
         ];
         
-        $result = $this->db->prepare('
+        $result = $this->getDb()->prepare('
             INSERT INTO users 
                 (first_name, last_name, email, password, role, is_valid, created_at, images_id)
                 VALUES
@@ -27,9 +30,10 @@ class UsersRepository extends DB
 
     public function getUser($email)
     {
-        $result = $this->db->prepare('SELECT * FROM users WHERE email = :email');
+        $result = $this->getDb()->prepare('SELECT * FROM users WHERE email = :email');
+        
         $result->execute([':email' => $email]);
         
-        return $result->fetch();
+        return $result->fetch(PDO::FETCH_OBJ);
     }
 }

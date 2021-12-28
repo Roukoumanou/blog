@@ -1,9 +1,12 @@
 <?php 
-require_once '../Repository/UsersRepository.php';
-require_once '../Exception/UserException.php';
-require_once '../Entity/Users.php';
+
+namespace App\Controller;
+
+use App\Entity\Users;
 use Zend\Crypt\Password\Bcrypt;
-use Zend\Stdlib\ResponseInterface;
+use App\Exception\UserException;
+use App\Repository\UsersRepository;
+use App\Controller\AbstractController;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
@@ -27,8 +30,7 @@ class UsersController extends AbstractController
                 throw new UserException("Cet email est déja utilisé");
             }
 
-            $query = new UsersRepository;
-            $query->register($user);
+            (new UsersRepository())->register($user);
 
             return $this->redirect('/');
         }
@@ -47,12 +49,12 @@ class UsersController extends AbstractController
             $user = $this->userVerify(htmlspecialchars($_POST['email']));
             $bcrypt = new Bcrypt();
 
-            if (!empty($user) && $bcrypt->verify(htmlspecialchars($_POST['password']), $user['password'])) {
+            if (!empty($user) && $bcrypt->verify(htmlspecialchars($_POST['password']), $user->password)) {
                 $_SESSION['user'] = [
-                    'id' => $user['id'],
-                    'firstName' => $user['first_name'],
-                    'lastName' => $user['last_name'],
-                    'email' => $user['email'],
+                    'id' => $user->id,
+                    'firstName' => $user->first_name,
+                    'lastName' => $user->last_name,
+                    'email' => $user->email,
                     'is_connected' => true
                 ];
                 
@@ -80,7 +82,6 @@ class UsersController extends AbstractController
      */
     private function userVerify(string $email)
     {
-        $userRepository = new UsersRepository;
-        return $userRepository->getUser($email);
+        return (new UsersRepository())->getUser($email);
     }
 }

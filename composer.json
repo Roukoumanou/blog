@@ -6,5 +6,10 @@
         "twig/twig": "^3.0",
         "altorouter/altorouter": "^2.0",
         "zendframework/zend-crypt": "^3.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
     }
 }

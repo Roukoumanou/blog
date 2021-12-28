@@ -1,10 +1,8 @@
 <?php
-
 session_start();
-require_once '../vendor/autoload.php';
-require_once '../config/router.php';
-require_once '../Controller/Exception/ExceptionController.php';
-
+require dirname(__DIR__).'/vendor/autoload.php';
+require dirname(__DIR__).'/config/router.php';
+use App\Controller\Exception\ExceptionController;
 $match = $router->match();
 
 if (!\is_null($match) && !\is_bool($match)) {

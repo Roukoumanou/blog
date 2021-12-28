@@ -1,15 +1,16 @@
 <?php 
 declare(strict_types=1);
+
+namespace App\Entity;
+
 use Zend\Crypt\Password\Bcrypt;
+use App\Exception\NotNullException;
 
 class Users
 {
     public const ROLE_ADMIN = 10;
     public const ROLE_USER  = 11;
     
-    /**
-     * @var integer
-     */
     private int $id;
 
     private string $firstName;
@@ -33,9 +34,9 @@ class Users
     public function __construct()
     {
         if (empty($this->createdAt)) {
-            $this->createdAt = new DateTime();
+            $this->createdAt = new \DateTime();
         }else{
-            $this->updatedAt = new DateTime();
+            $this->updatedAt = new \DateTime();
         }
     }
 
@@ -92,10 +93,11 @@ class Users
 
     private function notNull(string $champ, string $message)
     {
-        if (!htmlspecialchars($champ)) {
-            require_once 'Exception/NotNullException.php';
+        if (empty($champ)) {
             throw new NotNullException($message);
         }
+
+        return $champ;
     }
 
     /**
@@ -115,7 +117,7 @@ class Users
     {
         $this->notNull($email, "Le champs email est obligatoire!");
         if(!filter_var(htmlspecialchars($email), FILTER_VALIDATE_EMAIL)) {
-            throw new Exception("Cet Mail n'est pas valide");
+            throw new \Exception("Cet Mail n'est pas valide");
         }
         $this->email = htmlspecialchars($email);
 

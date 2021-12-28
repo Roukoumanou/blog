@@ -1,13 +1,16 @@
 <?php
+
+require_once '../vendor/autoload.php';
+require_once '../vendor/altorouter/altorouter/AltoRouter.php';
+use App\Controller\HomeController;
+use App\Controller\UsersController;
+use App\Controller\Administrator\AdminHomeController;
+
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
  * Cette page sert a de router pour tout le site
  * On n'y retrouve les routes de l'application
  */
-require_once '../vendor/altorouter/altorouter/AltoRouter.php';
-require_once '../Controller/HomeController.php';
-require_once '../Controller/Administrator/AdminHomeController.php';
-require_once '../Controller/UsersController.php';
 
 $router = new AltoRouter();
 

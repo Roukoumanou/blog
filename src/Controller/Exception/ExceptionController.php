@@ -1,5 +1,9 @@
 <?php
 
+namespace App\Controller\Exception;
+
+use App\Controller\AbstractController;
+
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
  * Cette classe gère les exceptions

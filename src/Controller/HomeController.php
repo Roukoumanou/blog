@@ -1,6 +1,7 @@
 <?php
+namespace App\Controller;
 
-require_once 'AbstractController.php';
+use App\Controller\AbstractController;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
