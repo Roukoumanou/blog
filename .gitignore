@@ -1,5 +1,7 @@
+###> framework ###
+/.sass-cache
+/node_modules
 /public/css
 /vendor
-/node_modules
-/.sass-cache/
-/seting.php
+/setting.php
+###< framework ###

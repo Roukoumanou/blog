@@ -7,7 +7,7 @@
     {% for flashError in app.flashes('verify_email_error') %}
       <div class="alert alert-danger" role="alert">{{ flashError }}</div>
     {% endfor %}
-    <form method="post" action='/connexion'>
+    <form method="post" action='/login'>
         <div class="mb-3">
           <label for="inputEmail1" class="form-label">Votre Adresse Email</label>
           <input type="email" name="email" pattern="[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{1,63}$" title="Veuillez entrer un e-mail valide" class="form-control" 

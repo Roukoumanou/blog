@@ -1,0 +1,2 @@
+Disallow: /login
+Allow: /*.css?*

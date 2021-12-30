@@ -1,0 +1,17 @@
+{
+    "name": "Mon Blog",
+    "short_name": "RB",
+    "lang": "fr_FR",
+    "start_url": "https://localhost:8000",
+    "scope": "/public/",
+    "icons": [
+        {
+            "src": "/android-chrome-72x72.png",
+            "sizes": "72x72",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff",
+    "display": "standalone"
+}

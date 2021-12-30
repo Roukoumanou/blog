@@ -1,4 +1,5 @@
 <?php 
+
 namespace App\Controller\Administrator;
 
 use App\Controller\AbstractController;
