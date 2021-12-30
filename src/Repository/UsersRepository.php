@@ -1,10 +1,14 @@
 <?php
+
 namespace App\Repository;
 
 use App\Entity\Users;
 use App\Repository\DB;
 use \PDO;
 
+/**
+ * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
+ */
 class UsersRepository extends DB
 {
     public function register(Users $user)
@@ -15,7 +19,7 @@ class UsersRepository extends DB
             'email' => $user->getEmail(),
             'password' => $user->getPassword(),
             'role' => $user->getRole(),
-            'is_valid' => $user->getIs_valid(),
+            'is_valid' => $user->getIsValid(),
             'created_at' => date_format($user->getCreatedAt(),"Y-m-d"),
             'images_id' => 1
         ];

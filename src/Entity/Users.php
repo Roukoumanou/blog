@@ -1,4 +1,5 @@
 <?php 
+
 declare(strict_types=1);
 
 namespace App\Entity;
@@ -6,6 +7,9 @@ namespace App\Entity;
 use Zend\Crypt\Password\Bcrypt;
 use App\Exception\NotNullException;
 
+/**
+ * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
+ */
 class Users
 {
     public const ROLE_ADMIN = 10;
@@ -23,13 +27,13 @@ class Users
 
     private int $role = self::ROLE_USER;
 
-    private $is_valid = 0;
+    private $isValid = 0;
 
     private \DateTimeInterface $createdAt;
 
     private \DateTimeInterface $updatedAt;
 
-    private int $images_id;
+    private int $imagesId;
 
     public function __construct()
     {
@@ -172,9 +176,9 @@ class Users
     /**
      * Get the value of is_valid
      */ 
-    public function getIs_valid()
+    public function getIsValid()
     {
-        return $this->is_valid;
+        return $this->isValid;
     }
 
     /**
@@ -182,9 +186,9 @@ class Users
      *
      * @return  self
      */ 
-    public function setIs_valid($is_valid): self
+    public function setIsValid($is_valid): self
     {
-        $this->is_valid = $is_valid;
+        $this->isValid = $is_valid;
 
         return $this;
     }
@@ -232,9 +236,9 @@ class Users
     /**
      * Get the value of images_id
      */ 
-    public function getImages_id(): int
+    public function getImagesId(): int
     {
-        return $this->images_id;
+        return $this->imagesId;
     }
 
     /**
@@ -242,9 +246,9 @@ class Users
      *
      * @return  self
      */ 
-    public function setImages_id(?int $images_id): self
+    public function setImagesId(?int $images_id): self
     {
-        $this->images_id = $images_id;
+        $this->imagesId = $images_id;
 
         return $this;
     }

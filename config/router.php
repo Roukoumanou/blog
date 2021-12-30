@@ -25,11 +25,16 @@ $router->map('GET', '/admin', function() {
 }, 'admin_home');
 
 // map registerpage
-$router->map('GET|POST', '/register', function() {
-    (new UsersController())->register();
-}, 'register');
+$router->map('GET|POST', '/registration', function() {
+    (new UsersController())->registration();
+}, 'registration');
 
 // map user Connect Page
-$router->map('GET|POST', '/connexion', function() {
-    (new UsersController())->connexion();
-}, 'connexion');
+$router->map('GET|POST', '/login', function() {
+    (new UsersController())->login();
+}, 'login');
+
+// map user DesConnect Page
+$router->map('GET', '/logout', function() {
+    (new UsersController())->logout();
+}, 'logout');

@@ -1,8 +1,12 @@
 <?php
+
 namespace App\Repository;
 
 require_once '../setting.php';
 
+/**
+ * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
+ */
 abstract class DB
 {
     private $db;
