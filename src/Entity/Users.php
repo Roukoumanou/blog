@@ -5,35 +5,90 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use Zend\Crypt\Password\Bcrypt;
+use Doctrine\ORM\Mapping as ORM;
 use App\Exception\NotNullException;
+use App\Repository\UsersRepository;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
+ * @ORM\Entity(repositoryClass=UsersRepository::class)
+ * @ORM\Table(name="users")
  */
 class Users
 {
     public const ROLE_ADMIN = 10;
     public const ROLE_USER  = 11;
     
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue
+     *
+     * @var integer
+     */
     private int $id;
 
+    /**
+     * @ORM\Column(type="string", name="first_name")
+     *
+     * @var string
+     */
     private string $firstName;
 
+    /**
+     * @ORM\Column(type="string", name="last_name")
+     *
+     * @var string
+     */
     private string $lastName;
 
+    /**
+     * @ORM\Column(type="string")
+     *
+     * @var string
+     */
     private string $email;
 
+    /**
+     * @ORM\Column(type="string")
+     *
+     * @var string
+     */
     private string $password;
 
+    /**
+     * @ORM\Column(type="integer")
+     *
+     * @var integer
+     */
     private int $role = self::ROLE_USER;
 
-    private $isValid = 0;
+    /**
+     * @ORM\Column(type="boolean", name="is_valid")
+     *
+     * @var bool
+     */
+    private $isValid = false;
 
+    /**
+     * @ORM\Column(type="date", name="created_at")
+     *
+     * @var \DateTimeInterface
+     */
     private \DateTimeInterface $createdAt;
 
+    /**
+     * @ORM\Column(type="date", name="updated_at", nullable=true)
+     *
+     * @var \DateTimeInterface
+     */
     private \DateTimeInterface $updatedAt;
 
-    private int $imagesId;
+    /**
+     * @ORM\OneToOne(targetEntity="Images", cascade={"persist"})
+     * @ORM\JoinColumn(name="images_id", referencedColumnName="id")
+     */
+    private $images;
 
     public function __construct()
     {
@@ -234,21 +289,21 @@ class Users
     }
 
     /**
-     * Get the value of images_id
+     * Get the value of images
      */ 
-    public function getImagesId(): int
+    public function getImages(): Images
     {
-        return $this->imagesId;
+        return $this->images;
     }
 
     /**
-     * Set the value of images_id
+     * Set the value of images
      *
      * @return  self
      */ 
-    public function setImagesId(?int $images_id): self
+    public function setImages(Images $images): self
     {
-        $this->imagesId = $images_id;
+        $this->images = $images;
 
         return $this;
     }

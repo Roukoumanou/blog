@@ -4,7 +4,7 @@
 
 {% block body %}
     <h1>{{ title }}</h1>
-    <form method="post" action='/registration'>
+    <form enctype="multipart/form-data" method="post" action='/registration'>
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="inputFirstName" class="form-label">Votre Nom</label>
@@ -23,6 +23,9 @@
         <div class="mb-3">
           <label for="inputPassword1" class="form-label">Votre Mot De Passe</label>
           <input type="password" name="password" class="form-control" id="inputPassword1" required>
+        </div>
+        <div class="mb-3">
+          <input type="file" size="32" name="avatar" value="">
         </div>
         <div class="mb-3 form-check">
           <input type="checkbox" name="condition" class="form-check-input" id="exampleCheck1" required>

@@ -28,6 +28,6 @@ abstract class AbstractController
      */
     protected function redirect(string $route)
     {
-        return header('Location:'.$route);
+        header('Location:'.$route);
     }
 }
