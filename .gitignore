@@ -1,7 +1,9 @@
 ###> framework ###
 /.sass-cache
 /node_modules
-/public/css
+/public/
+/public/img
+/phpstan.neon
 /vendor
 /setting.php
 ###< framework ###

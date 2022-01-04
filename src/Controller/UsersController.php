@@ -3,10 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Users;
+use App\Entity\Images;
+use App\Repository\Manager;
 use Zend\Crypt\Password\Bcrypt;
 use App\Exception\UserException;
-use App\Repository\UsersRepository;
 use App\Controller\AbstractController;
+use App\Repository\UsersRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
@@ -21,20 +24,29 @@ class UsersController extends AbstractController
         // Si le formulaire n'est pas vide et que les conditions d'utilisation ont été accepté
         if (!empty($_POST) && $_POST['condition'] === "on") {
             
+            // Je traite l'image envoyée
+          
+            $image = $this->uplodeFile($_FILES['avatar']);
+            
             // Je procède à la validation des données 
             $user = new Users();
             $user->setFirstName($_POST['firstName'])
                 ->setLastName($_POST['lastName'])
                 ->setEmail($_POST['email'])
-                ->setPassword($_POST['password']);
+                ->setPassword($_POST['password'])
+                ->setImages($image);
 
+            
             // Je vérifie si un utilisateur existe déja avec ce email et je renvois une error
             if ($this->userVerify($user->getEmail())) {
                 throw new UserException("Cet email est déja utilisé");
             }
 
             // Sinon je sauvegarde le nouveau utilisateur
-            (new UsersRepository())->register($user);
+            $em = Manager::getInstance()->getEm();
+            $em->persist($user);
+            $em->flush();
+
 
             return $this->redirect('/');
         }
@@ -42,6 +54,24 @@ class UsersController extends AbstractController
         return $this->render('register.html.twig', [
             'title' => 'Inscription',
         ]);
+    }
+
+    private function uplodeFile($file)
+    {
+        $handle = new \Verot\Upload\Upload($file);
+        if ($handle->uploaded) {
+            $handle->file_new_name_body   = uniqid("avatar");
+            $name = $handle->file_new_name_body;
+            $handle->image_resize         = true;
+            $handle->image_x              = 100;
+            $handle->image_ratio_y        = true;
+            $handle->process('../public/img/avatars');
+            if ($handle->processed) {
+                return (new Images())->setName($name);
+            } else {
+                echo 'error : ' . $handle->error;
+            }
+        }
     }
 
     /**
@@ -56,14 +86,14 @@ class UsersController extends AbstractController
             $bcrypt = new Bcrypt();
 
             //Si il y a un utilisateur, je vérifie que son mot de passe est valide
-            if (!empty($user) && $bcrypt->verify(htmlspecialchars($_POST['password']), $user->password)) {
+            if (!empty($user) && $bcrypt->verify(htmlspecialchars($_POST['password']), $user->getPassword())) {
                 
                 // Je met le user dans la session
                 $_SESSION['user'] = [
-                    'id' => $user->id,
-                    'firstName' => $user->first_name,
-                    'lastName' => $user->last_name,
-                    'email' => $user->email,
+                    'id' => $user->getId(),
+                    'firstName' => $user->getFirstName(),
+                    'lastName' => $user->getLastName(),
+                    'email' => $user->getEmail(),
                     'is_connected' => true
                 ];
                 
@@ -71,7 +101,7 @@ class UsersController extends AbstractController
             }
     
             //Si il y a un utilisateur et que le mot de passe ne correspond pas
-            if (!empty($user) && !$bcrypt->verify(htmlspecialchars($_POST['password']), $user['password'])) {
+            if (!empty($user) && !$bcrypt->verify(htmlspecialchars($_POST['password']), $user->getPassword())) {
                 throw new UserException("Email ou mot de passe erronné");
             }
 
@@ -89,7 +119,7 @@ class UsersController extends AbstractController
     /**
      * Permet de se deconnecter du site
      *
-     * @return void
+     * @return mixed
      */
     public function logout()
     {
@@ -109,6 +139,8 @@ class UsersController extends AbstractController
      */
     private function userVerify(string $email)
     {
-        return (new UsersRepository())->getUser($email);
+        /** @var EntityManagerInterface */
+        $em = Manager::getInstance()->getEm();
+        return $em->getRepository('App\Entity\Users')->findOneBy(['email' => htmlspecialchars($email)]);
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Controller\AbstractController;
-
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
  * Affiche la page d'accueil du site
