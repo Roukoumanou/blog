@@ -14,25 +14,24 @@
         <li class="nav-item">
           <a class="nav-link" href="#">Contact</a>
         </li>
-        {% if app.user %}
+        {% if app.user.is_connected %}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Mon Compte
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="#">Modifier mon compte</a></li>
-            <li><a class="dropdown-item" href="#">Modifier mon mot de passe</a></li>
+            <li><a class="dropdown-item" href="/account-update">Modifier mon compte</a></li>
+            <li><a class="dropdown-item" href="/password-update">Modifier mon mot de passe</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Deconnexion</a></li>
+            <li><a class="dropdown-item" href="/logout">Deconnexion</a></li>
           </ul>
         </li>
         {% else %}
           <ul class="navbar-nav float rigth">
-            <li class="nav-item"><a class="nav-link active" href="/connexion">Connexion</a></li>
-            <li class="nav-item"><a class="nav-link active" href="/register">Inscription</a></li>
+            <li class="nav-item"><a class="nav-link active" href="/login">Connexion</a></li>
+            <li class="nav-item"><a class="nav-link active" href="/registration">Inscription</a></li>
           </ul>
         {% endif %}
       </ul>
-
     </div>
 </nav>

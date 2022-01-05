@@ -5,6 +5,7 @@ require_once '../vendor/altorouter/altorouter/AltoRouter.php';
 use App\Controller\HomeController;
 use App\Controller\UsersController;
 use App\Controller\Administrator\AdminHomeController;
+use App\Entity\Users;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
@@ -25,11 +26,28 @@ $router->map('GET', '/admin', function() {
 }, 'admin_home');
 
 // map registerpage
-$router->map('GET|POST', '/register', function() {
-    (new UsersController())->register();
-}, 'register');
+$router->map('GET|POST', '/registration', function() {
+    (new UsersController())->registration();
+}, 'registration');
 
 // map user Connect Page
-$router->map('GET|POST', '/connexion', function() {
-    (new UsersController())->connexion();
-}, 'connexion');
+$router->map('GET|POST', '/login', function() {
+    (new UsersController())->login();
+}, 'login');
+
+// map user DesConnect Page
+$router->map('GET', '/logout', function() {
+    (new UsersController())->logout();
+}, 'logout');
+
+if (isset($_SESSION['user'])) {
+    $user = $_SESSION['user'];
+    // map user update account Page
+    $router->map('GET|POST', '/account-update', function(){
+        (new UsersController())->updateAccount();
+    }, 'account_update');
+
+    $router->map('GET|POST', '/password-update', function(){
+        (new UsersController())->updatePassword();
+    }, 'password_update');
+}

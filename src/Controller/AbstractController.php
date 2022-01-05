@@ -21,6 +21,15 @@ abstract class AbstractController
         echo $twig->render($tmp, $option);
     }
 
+    protected function getUser()
+    {
+        if (isset($_SESSION['user'])) {
+            return $_SESSION['user'];
+        }
+
+        return null;
+    }
+
     /**
      * Permet de rediriger sur une page
      *
@@ -28,6 +37,6 @@ abstract class AbstractController
      */
     protected function redirect(string $route)
     {
-        return header('Location:'.$route);
+        header('Location:'.$route);
     }
 }
