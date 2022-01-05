@@ -43,7 +43,7 @@ class Users
     private string $lastName;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", unique=true)
      *
      * @var string
      */
@@ -86,7 +86,7 @@ class Users
 
     /**
      * @ORM\OneToOne(targetEntity="Images", cascade={"persist"})
-     * @ORM\JoinColumn(name="images_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="images_id", referencedColumnName="id", nullable=true)
      */
     private $images;
 
@@ -201,7 +201,7 @@ class Users
         $this->notNull($password, "Le mot de passe est obligatoire!");
 
         $bcrypt = new Bcrypt();
-        $hash = $bcrypt->create(htmlspecialchars($_POST['password'])); // password hashed
+        $hash = $bcrypt->create(htmlspecialchars($password)); // password hashed
 
         $this->password = $hash;
 

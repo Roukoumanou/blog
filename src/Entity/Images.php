@@ -20,14 +20,14 @@ class Images
     private int $id;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", nullable=true)
      *
      * @var string
      */
     private string $name;
 
     /**
-     * @ORM\Column(type="date", name="created_at")
+     * @ORM\Column(type="date", name="created_at", nullable=true)
      *
      * @var \DateTimeInterface
      */

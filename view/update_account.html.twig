@@ -1,0 +1,31 @@
+{% extends "layout.html.twig" %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block body %}
+    <h1>{{ title }}</h1>
+    <form enctype="multipart/form-data" method="post" action='/account-update'>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="inputFirstName" class="form-label">Votre Nom</label>
+                <input type="text" name="firstName" value="{{ user.firstName }}" class="form-control" id="inputFirstName" required 
+                aria-describedby="firstNameHelp">
+            </div>
+            <div class="col-md-6">
+                <label for="inputLastName" class="form-label">Votre PréNom</label>
+                <input type="text" name="lastName" value="{{ user.lastName }}" class="form-control" id="inputLastName" required 
+                aria-describedby="lastNameHelp">
+            </div>
+        </div>
+        <div class="mb-3">
+          <label for="inputEmail1" class="form-label">Votre Adresse Email</label>
+          <input type="email" name="email" value="{{ user.email }}" pattern="[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{1,63}$"
+           title="Veuillez entrer un e-mail valide" 
+          class="form-control" id="inputEmail1" required aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <input type="file" size="32" name="avatar" value="">
+        </div>
+        <button type="submit" class="btn btn-primary">Modifier</button>
+    </form>
+{% endblock %}
