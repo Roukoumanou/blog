@@ -5,6 +5,7 @@ require_once '../vendor/altorouter/altorouter/AltoRouter.php';
 use App\Controller\HomeController;
 use App\Controller\UsersController;
 use App\Controller\Administrator\AdminHomeController;
+use App\Entity\Users;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
@@ -38,3 +39,15 @@ $router->map('GET|POST', '/login', function() {
 $router->map('GET', '/logout', function() {
     (new UsersController())->logout();
 }, 'logout');
+
+if (isset($_SESSION['user'])) {
+    $user = $_SESSION['user'];
+    // map user update account Page
+    $router->map('GET|POST', '/account-update', function(){
+        (new UsersController())->updateAccount();
+    }, 'account_update');
+
+    $router->map('GET|POST', '/password-update', function(){
+        (new UsersController())->updatePassword();
+    }, 'password_update');
+}
