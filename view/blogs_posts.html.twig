@@ -1,0 +1,31 @@
+{% extends "layout.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block hero %}{{ title }}{% endblock %}
+
+{% block body %}
+
+    <!-- Main Content-->
+    <div class="container px-4 px-lg-5">
+      <div class="row gx-4 gx-lg-5 justify-content-center">
+        <!-- Post preview-->
+        {% for post in posts %}
+          <div class="col-md-10 col-lg-8 col-xl-7">
+            <div class="post-preview bg-light">
+              <h2 class="post-title">{{ post.title }}</h2>
+              <p class="post-meta">
+                Publier par
+                {{ post.createdBy|title }} Le 
+                {{ post.updatedAt ? post.updatedAt|date("d m Y") : post.createdAt|date("d m Y") }}
+              </p>
+              <p class="post-subtitle">{{ post.intro|nl2br }}</p>
+              <a href="/post-{{ post.id }}" class="btn btn-outline-info">Lire la suite</a>
+              <!-- Divider-->
+              <hr class="my-4" />
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+{% endblock %}
