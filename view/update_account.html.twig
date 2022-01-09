@@ -2,8 +2,9 @@
 
 {% block title %} {{ title }} {% endblock %}
 
+{% block hero %}{{ title }}{% endblock %}
+
 {% block body %}
-    <h1>{{ title }}</h1>
     <form enctype="multipart/form-data" method="post" action='/account-update'>
         <div class="row mb-3">
             <div class="col-md-6">

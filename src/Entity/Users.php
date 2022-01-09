@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Entity\Commentes;
 use Zend\Crypt\Password\Bcrypt;
 use Doctrine\ORM\Mapping as ORM;
 use App\Exception\NotNullException;
 use App\Repository\UsersRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
@@ -90,6 +93,11 @@ class Users
      */
     private $images;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Commentes", mappedBy="users_id")
+     */
+    private $commentes;
+
     public function __construct()
     {
         if (empty($this->createdAt)) {
@@ -97,6 +105,8 @@ class Users
         }else{
             $this->updatedAt = new \DateTime();
         }
+
+        $this->commentes = new ArrayCollection();
     }
 
     /**
@@ -306,5 +316,20 @@ class Users
         $this->images = $images;
 
         return $this;
+    }
+
+    public function addCommentes(Commentes $commente)
+    {
+        $this->commentes[] = $commente;
+        
+        return $this;
+    }
+
+    /**
+     * @return Collection|Commentes
+     */
+    public function getCommentes(): Collection
+    {
+        return $this->commentes;
     }
 }

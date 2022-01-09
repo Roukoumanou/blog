@@ -7,6 +7,8 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
+ * Cette classe sert de repository pour l'entité des utilisateurs
+ * 
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
  */
 class UsersRepository extends EntityRepository

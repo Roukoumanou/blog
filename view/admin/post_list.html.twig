@@ -1,0 +1,36 @@
+{% extends "admin/layout.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <h1>{{ title }}</h1>
+
+    <a href="/admin-new-post" class="btn btn-outline-link">Ajouter un blogPost</a>
+
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Title</th>
+            <th scope="col">Status</th>
+            <th scope="col">created By</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in posts %}
+            <tr>
+                <th scope="row">{{ post.id}}</th>
+                <td>{{ post.title }}</td>
+                <td>{{ post.status }}</td>
+                <td>{{ post.createdBy }}</td>
+                <td>
+                    <a class="btn btn-outline-primary" href="/post-{{ post.id }}">Voir</a>
+                    <a class="btn btn-outline-secondary" href='/admin-update-post-{{ post.id }}'>Modifier</a>
+                    <a class="btn btn-outline-danger" href='/admin-delete-post-{{ post.id }}'>Supprimer</a>
+                </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+{% endblock %}
