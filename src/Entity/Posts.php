@@ -83,7 +83,7 @@ class Posts
     private \DateTimeInterface $updatedAt;
 
     /**
-     * @ORM\OneToMany(targetEntity="Commentes", mappedBy="post_id")
+     * @ORM\OneToMany(targetEntity="Commentes", mappedBy="postId")
      */
     private $commentes;
 
@@ -284,9 +284,9 @@ class Posts
      */
     public function addCommentes(Commentes $commente): self
     {
-        if (!$this->commentes->contains($commente)) {
-        $this->commentes[] = $commente;
-        $commente->setPostId($this);
+        if (! $this->commentes->contains($commente)) {
+            $this->commentes[] = $commente;
+            $commente->setPostId($this);
         }
 
         return $this;

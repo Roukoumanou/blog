@@ -1,0 +1,33 @@
+{% extends "admin/layout.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <h1>{{ title }}</h1>
+
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Title post</th>
+            <th scope="col">Comment Status</th>
+            <th scope="col">created At</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for comment in comments %}
+            <tr>
+                <th scope="row">{{ comment.id}}</th>
+                <td>{{ comment.postId.title }}</td>
+                <td>{{ comment.isValid ? "Valid" : "Not Valid" }}</td>
+                <td>{{ comment.createdAt|date("d m Y") }}</td>
+                <td>
+                    <a class="btn btn-outline-primary" href="/admin-comment-{{ comment.id }}">Voir</a>
+                    <a class="btn btn-outline-danger" href='/admin-valided-comment-{{ comment.id }}'>Valider</a>
+                </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+{% endblock %}

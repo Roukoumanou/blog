@@ -5,9 +5,10 @@ require_once '../vendor/altorouter/altorouter/AltoRouter.php';
 use App\Entity\Users;
 use App\Controller\HomeController;
 use App\Controller\UsersController;
+use App\Controller\BlogsPostsController;
 use App\Controller\Administrator\AdminHomeController;
 use App\Controller\Administrator\AdminPostsController;
-use App\Controller\BlogsPostsController;
+use App\Controller\Administrator\AdminCommentsController;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
@@ -31,8 +32,8 @@ $router->map('GET', '/blogs', function(){
     (new BlogsPostsController())->posts();
 }, 'blogs');
 
-$router->map('GET', '/post-[i:id]', function($id){
-    (new BlogsPostsController())->showPost($id);
+$router->map('GET|POST', '/post-[i:id]', function($id){
+    (new BlogsPostsController())->showPost(htmlspecialchars($id));
 }, 'view_post');
 
 // map user Connect Page
@@ -73,15 +74,27 @@ if (isset($_SESSION['user'])) {
         }, 'new_post');
 
         $router->map('GET|POST', '/admin-update-post-[i:id]', function($id){
-            (new AdminPostsController())->updatePost($id);
+            (new AdminPostsController())->updatePost(htmlspecialchars($id));
         }, 'update_post');
 
         $router->map('GET', '/admin-delete-post-[i:id]', function($id){
-            (new AdminPostsController())->deletePost($id);
+            (new AdminPostsController())->deletePost(htmlspecialchars($id));
         }, 'admin_delete_post');
 
         $router->map('GET', '/admin-posts', function(){
             (new AdminPostsController())->postList();
         }, 'posts_list');
+
+        $router->map('GET', '/admin-comments', function(){
+            (new AdminCommentsController())->comments();
+        }, 'comments_list');
+
+        $router->map('GET', '/admin-comment-[i:id]', function($id){
+            (new AdminCommentsController())->comment(htmlspecialchars($id));
+        }, 'admin_comment');
+
+        $router->map('GET', '/admin-valided-comment-[i:id]', function($id){
+            (new AdminCommentsController())->validedComment(htmlspecialchars($id));
+        }, 'admin_valided_comment');
     }
 }

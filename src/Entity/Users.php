@@ -88,13 +88,13 @@ class Users
     private \DateTimeInterface $updatedAt;
 
     /**
-     * @ORM\OneToOne(targetEntity="Images", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="Images", cascade={"persist", "remove", "merge"})
      * @ORM\JoinColumn(name="images_id", referencedColumnName="id", nullable=true)
      */
     private $images;
 
     /**
-     * @ORM\OneToMany(targetEntity="Commentes", mappedBy="users_id")
+     * @ORM\OneToMany(targetEntity="Commentes", mappedBy="userId")
      */
     private $commentes;
 
@@ -301,7 +301,7 @@ class Users
     /**
      * Get the value of images
      */ 
-    public function getImages(): Images
+    public function getImages(): ?Images
     {
         return $this->images;
     }
@@ -311,17 +311,31 @@ class Users
      *
      * @return  self
      */ 
-    public function setImages(Images $images): self
+    public function setImages(?Images $images): self
     {
         $this->images = $images;
 
         return $this;
     }
 
-    public function addCommentes(Commentes $commente)
+    /**
+     * @param Commentes $commente
+     * @return self
+     */
+    public function addCommentes(Commentes $commente): self
     {
-        $this->commentes[] = $commente;
-        
+        if (! $this->commentes->contains($commente)) {
+            $this->commentes[] = $commente;
+            $commente->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommente(Commentes $commente): self
+    {
+        $this->commentes->removeElement($commente);
+
         return $this;
     }
 

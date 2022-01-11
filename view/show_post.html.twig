@@ -25,4 +25,41 @@
             </div>
         </div>
     </article>
+    <hr>
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <h2>Commentaires</h2>
+                <div class="row bg-light m-3">
+                    <div class="col-md-12">
+                        {% for comment in commentes %}
+                            <div class="border-start border-secondary border-4 p-2">
+                                <p class="text-info mb-2">{{ comment.userId.firstName|title }} a dit <span class="text-muted">le {{ comment.createdAt|date('d-m-Y') }}</span></p>
+                                {{ comment.content|nl2br }}<br />
+                            </div>
+                            <hr />
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if app.user.is_connected %}
+                    <div class="my-5">
+                        <form method="post" action='/post-{{ post.id }}'>
+                            <div class="form-floating border">
+                                <textarea class="form-control" name="message" id="message" required placeholder="Entrez votre commentaire ici..." style="height: 12rem" data-sb-validations="required"></textarea>
+                                <label for="message">Ajouter un Commentaire</label>
+                                <div class="invalid-feedback" data-sb-feedback="message:required">Ce champs est obligatoire s'il vous plait.</div>
+                            </div>
+                            <!-- an error submitting the form-->
+                            <div class="d-none" id="submitErrorMessage"><div class="text-center text-danger mb-3">Error sending message!</div></div>
+                            <!-- Submit Button-->
+                            <button class="btn btn-primary text-uppercase mt-4" id="submitButton" type="submit">Envoyer</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <a class="btn btn-outline-primary" href="/login">Connectez-vous pour commenter</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 {% endblock %}

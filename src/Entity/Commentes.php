@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Entity\Posts;
 use App\Entity\Users;
 use Doctrine\ORM\Mapping as ORM;
+use App\Exception\NotNullException;
 use App\Repository\CommentesRepository;
 
 /**
@@ -91,26 +92,22 @@ class Commentes
     }
 
     /**
-     * Set the value of postId
-     *
-     * @return  self
+     * @param Posts $post
+     * @return self
      */ 
     public function setPostId(Posts $post): self
     {
-        $post->addCommentes($this);
         $this->postId = $post;
 
         return $this;
     }
 
     /**
-     * Set the value of userId
-     *
-     * @return  self
-     */ 
+     * @param Users $user
+     * @return self
+     */
     public function setUserId(Users $user): self
     {
-        $user->addCommentes($this);
         $this->userId = $user;
 
         return $this;
@@ -129,7 +126,7 @@ class Commentes
      */ 
     public function setContent($content): self
     {
-        $this->content = $content;
+        $this->content = $this->notNull(htmlspecialchars($content), "Le champs Message est obligatoire");
 
         return $this;
     }
@@ -172,5 +169,14 @@ class Commentes
         $this->createdAt = $createdAt;
 
         return $this;
+    }
+
+    private function notNull(string $champ, string $message)
+    {
+        if (empty($champ)) {
+            throw new NotNullException($message);
+        }
+
+        return $champ;
     }
 }
