@@ -20,6 +20,8 @@ class UsersController extends AbstractController
 {
     /**
      * Permet de s'inscrire sur le site
+     * 
+     * @var EntityManagerInterface $em
      */
     public function registration()
     {
@@ -62,6 +64,8 @@ class UsersController extends AbstractController
 
     /**
      * Permet de modifier son compte
+     * @var EntityManagerInterface $em
+     * @var Users $user
      */
     public function updateAccount()
     {
@@ -70,21 +74,21 @@ class UsersController extends AbstractController
 
                 if (!empty($_POST)) {
     
-                    /** @var Users $user */
                     $user = $this->userVerify(htmlspecialchars($this->getUser()['email']));
-                    
                     // Je vérifie si l' utilisateur a changé d'email et que ce mail n'existe déja pas dans la base de donnée
                     if ($user->getEmail() !== $_POST['email'] && empty(! $this->userVerify(htmlspecialchars($_POST['email'])))) {
                         throw new UserException("Cet email est déja utilisé");
                     }
-    
+                    
                     // Je récupère l'image précédant
                     $image = $user->getImages();
-    
-                    // Je traite l'image envoyée s'il en en a
-                    if (!empty($_FILES['avatar'])) {
-                        unlink(dirname(__DIR__, 2).'/public/img/avatars/'.$image->getName().'.jpg');
-                        $image = $this->uplodeFile($_FILES['avatar']);
+                    
+                    // Je traite l'image envoyée s'il en a
+                    if ($_FILES['avatar']['error'] === 0) {
+                        if ($image != null) {
+                            unlink(dirname(__DIR__, 2).'/public/img/avatars/'.$image->getName().'.jpg');
+                        }
+                        $image = $this->uplodeFile($_FILES['avatar'], $image);
                     }
     
                     // Je procède à la  des types de données 
@@ -122,11 +126,12 @@ class UsersController extends AbstractController
             return (new ExceptionController())->error500($e->getMessage());
         }
         return $this->redirect('/login');
-
     }
 
     /**
      * Permet de modifier le mot de passe
+     * @var EntityManagerInterface $em
+     * @var Users|null $user
      */
     public function updatePassword()
     {
@@ -174,9 +179,9 @@ class UsersController extends AbstractController
     /**
      * Permet le upload de fichier jpeg
      *
-     * @param mixed $file
+     * @param FILES $file
      */
-    private function uplodeFile($file)
+    private function uplodeFile($file, $lastImage = null)
     {
         try {
             $handle = new \Verot\Upload\Upload($file);
@@ -190,9 +195,11 @@ class UsersController extends AbstractController
                 $handle->image_ratio_y        = true;
                 $handle->process('../public/img/avatars');
                 if ($handle->processed) {
+                    if ($lastImage != null) {
+                        return $lastImage->setName($name)
+                                ->setUpdatedAt(new \DateTime());
+                    }
                     return (new Images())->setName($name);
-                } else {
-                    echo 'error : ' . $handle->error;
                 }
             }
         } catch (Exception $e) {
@@ -202,18 +209,19 @@ class UsersController extends AbstractController
 
     /**
      * Permet de se connecter sur le site
+     * @var Users|null $user
      */
     public function login()
     {
         try {
-            if (!empty($_POST)) {
+            if (! empty($_POST)) {
 
                 // Je vérifie si un utilisateur a cet email
                 $user = $this->userVerify(htmlspecialchars($_POST['email']));
                 $bcrypt = new Bcrypt();
     
                 //Si il y a un utilisateur, je vérifie que son mot de passe est valide
-                if (!empty($user) && $bcrypt->verify(htmlspecialchars($_POST['password']), $user->getPassword())) {
+                if (! empty($user) && $bcrypt->verify(htmlspecialchars($_POST['password']), $user->getPassword())) {
                     
                     // Je met le user dans la session
                     $_SESSION['user'] = [
@@ -276,6 +284,7 @@ class UsersController extends AbstractController
 
     /**
      * Permet de verifier si un utilisateur existe
+     * @var EntityManagerInterface $em
      *
      * @param string $email
      */

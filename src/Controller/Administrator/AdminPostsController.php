@@ -11,18 +11,23 @@ use Exception;
 
 class AdminPostsController extends AbstractController
 {
+    /**
+     * @var EntityManagerInterface $em
+     */
     public function postList()
     {
-        /** @var EntityManagerInterface */
         $em = Manager::getInstance()->getEm();
         $posts = $em->getRepository("App\Entity\Posts")->findAll();
         
         return $this->render('admin/post_list.html.twig', [
-            'title' => 'liste des Articles',
+            'title' => 'Liste des Articles',
             'posts' => $posts
         ]);
     }
 
+    /**
+     * @var EntityManagerInterface $em
+     */
     public function newPost()
     {
         if (! empty($_POST)) {
@@ -52,6 +57,11 @@ class AdminPostsController extends AbstractController
         ]);
     }
 
+    /**
+     * @var EntityManagerInterface $em
+     *
+     * @param integer $id
+     */
     public function updatePost(int $id)
     {
         $post = $this->getPost($id);
@@ -83,6 +93,9 @@ class AdminPostsController extends AbstractController
         ]);
     }
 
+    /**
+     * @param integer $id
+     */
     public function viewPost(int $id)
     {
         $post = $this->getPost($id);
@@ -93,10 +106,14 @@ class AdminPostsController extends AbstractController
         ]);
     }
 
+    /**
+     * @var EntityManagerInterface $em
+     *
+     * @param integer $id
+     */
     public function deletePost(int $id)
     {
         try {
-            /** @var EntityManagerInterface $em */
             $em = Manager::getInstance()->getEm();
             $post = $em->find(Posts::class, $id);
             
@@ -110,10 +127,14 @@ class AdminPostsController extends AbstractController
         }
     }
 
-    private function getPost($id)
+    /**
+     * @var EntityManagerInterface $em
+     *
+     * @param integer $id
+     */
+    private function getPost(int $id)
     {
         try {
-            /** @var EntityManagerInterface */
             $em = Manager::getInstance()->getEm();
             return $em->getRepository('App\Entity\Posts')->findOneBy(['id' => htmlspecialchars($id)]);
             
