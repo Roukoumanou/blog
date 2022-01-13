@@ -1,8 +1,7 @@
 ###> framework ###
-/.sass-cache
+/.env
 /node_modules
 /public/img
-/view/contact.html.twig
 /phpstan.neon
 /vendor
 ###< framework ###

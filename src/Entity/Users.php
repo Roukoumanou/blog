@@ -185,7 +185,7 @@ class Users
     public function setEmail(string $email): self
     {
         $this->notNull($email, "Le champs email est obligatoire!");
-        if(!filter_var(htmlspecialchars($email), FILTER_VALIDATE_EMAIL)) {
+        if(! filter_var(htmlspecialchars($email), FILTER_VALIDATE_EMAIL)) {
             throw new \Exception("Cet Mail n'est pas valide");
         }
         $this->email = htmlspecialchars($email);
