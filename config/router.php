@@ -5,6 +5,7 @@ require_once '../vendor/altorouter/altorouter/AltoRouter.php';
 use App\Entity\Users;
 use App\Controller\HomeController;
 use App\Controller\UsersController;
+use App\Controller\ContactController;
 use App\Controller\BlogsPostsController;
 use App\Controller\Administrator\AdminHomeController;
 use App\Controller\Administrator\AdminPostsController;
@@ -40,6 +41,11 @@ $router->map('GET|POST', '/post-[i:id]', function($id){
 $router->map('GET|POST', '/login', function() {
     (new UsersController())->login();
 }, 'login');
+
+// map homepage
+$router->map('GET|POST', '/contact', function() {
+    (new ContactController())->contactMe();
+}, 'contact');
 
 // map user DesConnect Page
 $router->map('GET', '/logout', function() {

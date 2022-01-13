@@ -2,7 +2,6 @@
 
 namespace App\Repository;
 
-
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 
@@ -39,14 +38,14 @@ class Manager
         $useSimpleAnnotationReader = false;
 
         $config = Setup::createAnnotationMetadataConfiguration(array(dirname(__DIR__)."/Entity"), $isDevMode, $proxyDir, $cache, $useSimpleAnnotationReader);
-      
+
         // database configuration parameters
         $conn = array(
-            'dbname' => 'p5test',
-            'user' => 'loukmane',
-            'password' => 'Mot2*Passe',
-            'host' => 'localhost',
-            'driver' => 'pdo_mysql',
+            'dbname' => $_ENV['DB_NAME'],
+            'user' => $_ENV['DB_USER'],
+            'password' => $_ENV['DB_PASS'],
+            'host' => $_ENV['DB_HOST'],
+            'driver' => $_ENV['DB_DRIVER'],
         );
 
         // obtaining the entity manager
