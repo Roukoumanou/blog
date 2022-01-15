@@ -2,26 +2,46 @@
 
 namespace App\Controller\Administrator;
 
+use Exception;
 use App\Entity\Posts;
 use App\Repository\Manager;
+use Kilte\Pagination\Pagination;
 use App\Controller\AbstractController;
-use App\Controller\Exception\ExceptionController;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
+use App\Controller\Exception\ExceptionController;
 
 class AdminPostsController extends AbstractController
 {
     /**
      * @var EntityManagerInterface $em
      */
-    public function postList()
+    public function postList($currentPage)
     {
-        $em = Manager::getInstance()->getEm();
-        $posts = $em->getRepository("App\Entity\Posts")->findAll();
+        try {
+            $em = Manager::getInstance()->getEm();
+
+            $repo = $em->getRepository("App\Entity\Posts");
+
+            $totalItems = count($repo->findAll());
+            $itemsPerPage = 2;
+            $neighbours = 4;
+
+            $pagination = new Pagination($totalItems, $currentPage, $itemsPerPage, $neighbours);
+            $offset = $pagination->offset();
+            $limit = $pagination->limit();
+
+            $posts = $repo->findBy(
+                [], ['id' => 'DESC'], $limit, $offset);
+
+            $pages = $pagination->build();
+        } catch (Exception $e) {
+            return (new ExceptionController())->error500($e->getMessage());
+        }
         
         return $this->render('admin/post_list.html.twig', [
             'title' => 'Liste des Articles',
-            'posts' => $posts
+            'posts' => $posts,
+            'pages' => $pages
         ]);
     }
 

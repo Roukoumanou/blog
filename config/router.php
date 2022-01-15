@@ -29,9 +29,9 @@ $router->map('GET|POST', '/registration', function() {
     (new UsersController())->registration();
 }, 'registration');
 
-$router->map('GET', '/blogs', function(){
-    (new BlogsPostsController())->posts();
-}, 'blogs');
+$router->map('GET', '/posts[i:id]?', function(int $id = 1){
+    (new BlogsPostsController())->posts($id);
+}, 'list-posts');
 
 $router->map('GET|POST', '/post-[i:id]', function($id){
     (new BlogsPostsController())->showPost(htmlspecialchars($id));
@@ -87,12 +87,12 @@ if (isset($_SESSION['user'])) {
             (new AdminPostsController())->deletePost(htmlspecialchars($id));
         }, 'admin_delete_post');
 
-        $router->map('GET', '/admin-posts', function(){
-            (new AdminPostsController())->postList();
+        $router->map('GET', '/admin-posts[i:id]?', function(int $id = 1){
+            (new AdminPostsController())->postList($id);
         }, 'posts_list');
 
-        $router->map('GET', '/admin-comments', function(){
-            (new AdminCommentsController())->comments();
+        $router->map('GET', '/admin-comments[i:id]?', function(int $id = 1){
+            (new AdminCommentsController())->comments($id);
         }, 'comments_list');
 
         $router->map('GET', '/admin-comment-[i:id]', function($id){

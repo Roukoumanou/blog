@@ -5,7 +5,6 @@
 {% block hero %}{{ title }}{% endblock %}
 
 {% block body %}
-
     <!-- Main Content-->
     <div class="container px-4 px-lg-5">
       <div class="row gx-4 gx-lg-5 justify-content-center">
@@ -26,6 +25,14 @@
             </div>
           </div>
         {% endfor %}
+        <nav aria-label="Page navigation example">
+          <ul class="pagination justify-content-center">
+            <li class="page-link">Pages</li>
+            {% for key, page in pages %}
+              <li class="page-item"><a class="page-link {% if page == "current" %} text-danger {% endif %}" href="/posts{{ key }}">{{ key }}</a></li>
+            {% endfor %}
+          </ul>
+        </nav>
       </div>
     </div>
 {% endblock %}

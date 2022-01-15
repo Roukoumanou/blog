@@ -20,7 +20,7 @@
             <tr>
                 <th scope="row">{{ comment.id}}</th>
                 <td>{{ comment.postId.title }}</td>
-                <td>{{ comment.isValid ? "Valid" : "Not Valid" }}</td>
+                <td>{{ comment.isValid ? "Valid" : "Not Valided" }}</td>
                 <td>{{ comment.createdAt|date("d m Y") }}</td>
                 <td>
                     <a class="btn btn-outline-primary" href="/admin-comment-{{ comment.id }}">Voir</a>
@@ -29,5 +29,14 @@
             </tr>
           {% endfor %}
         </tbody>
-      </table>
+    </table>
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+        <li class="page-link">Pages</li>
+        {% for key, page in pages %}
+          <li class="page-item"><a class="page-link {% if page == "current" %} text-danger {% endif %}" href="/admin-comments{{ key }}">{{ key }}</a></li>
+        {% endfor %}
+      </ul>
+    </nav>
 {% endblock %}
+
