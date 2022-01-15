@@ -22,7 +22,7 @@
             <tr>
                 <th scope="row">{{ post.id}}</th>
                 <td>{{ post.title }}</td>
-                <td>{{ post.status }}</td>
+                <td>{{ post.status == 20 ? "Public" : "Brouillon" }}</td>
                 <td>{{ post.createdBy }}</td>
                 <td>
                     <a class="btn btn-outline-primary" href="/post-{{ post.id }}">Voir</a>
@@ -32,5 +32,13 @@
             </tr>
           {% endfor %}
         </tbody>
-      </table>
+    </table>
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+        <li class="page-link">Pages</li>
+        {% for key, page in pages %}
+          <li class="page-item"><a class="page-link {% if page == "current" %} text-danger {% endif %}" href="/admin-posts{{ key }}">{{ key }}</a></li>
+        {% endfor %}
+      </ul>
+    </nav>
 {% endblock %}
