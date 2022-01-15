@@ -3,22 +3,44 @@
 namespace App\Controller\Administrator;
 
 use App\Repository\Manager;
+use Kilte\Pagination\Pagination;
 use App\Controller\AbstractController;
+use App\Controller\Exception\ExceptionController;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 
 class AdminCommentsController extends AbstractController
 {
     /**
      * @var EntityManagerInterface $em
      */
-    public function comments()
+    public function comments($currentPage)
     {
-        $em = Manager::getInstance()->getEm();
-        $comments = $em->getRepository("App\Entity\Commentes")->findAll();
+        try {
+            $em = Manager::getInstance()->getEm();
+
+            $repo = $em->getRepository("App\Entity\Commentes");
+
+            $totalItems = count($repo->findBy(['isValid' => false]));
+            $itemsPerPage = 2;
+            $neighbours = 4;
+
+            $pagination = new Pagination($totalItems, $currentPage, $itemsPerPage, $neighbours);
+            $offset = $pagination->offset();
+            $limit = $pagination->limit();
+
+            $comments = $repo->findBy(
+                ['isValid' => false], ['id' => 'ASC'], $limit, $offset);
+
+            $pages = $pagination->build();
+        } catch (Exception $e) {
+            return (new ExceptionController())->error500($e->getMessage());
+        }
 
         return $this->render('admin/comments.html.twig', [
-            'title' => 'Liste des commentaires',
-            'comments' => $comments
+            'title' => 'Liste des commentaires non validés',
+            'comments' => $comments,
+            'pages' => $pages
         ]);
     }
 
@@ -45,13 +67,17 @@ class AdminCommentsController extends AbstractController
      */
     public function validedComment(int $id)
     {
-        $em = Manager::getInstance()->getEm();
-        $comment = $em->getRepository("App\Entity\Commentes")->findOneBy(['id' => $id]);
+        try {
+            $em = Manager::getInstance()->getEm();
+            $comment = $em->getRepository("App\Entity\Commentes")->findOneBy(['id' => $id]);
 
-        $comment->setIsValid(true);
+            $comment->setIsValid(true);
 
-        $em->merge($comment);
-        $em->flush();
+            $em->merge($comment);
+            $em->flush();
+        } catch (Exception $e) {
+            return (new ExceptionController())->error500($e->getMessage());
+        }
 
         return $this->redirect('/admin-comments');
     }
