@@ -27,7 +27,7 @@ class UsersController extends AbstractController
     {
         try {
             // Si le formulaire n'est pas vide et que les conditions d'utilisation ont été accepté
-            if (!empty($_POST) && $_POST['condition'] === "on") {
+            if (! empty($_POST) && $_POST['condition'] === "on") {
                 
                 // Je traite l'image envoyée
                 $image = $this->uplodeFile($_FILES['avatar']);
@@ -85,7 +85,7 @@ class UsersController extends AbstractController
                     
                     // Je traite l'image envoyée s'il en a
                     if ($_FILES['avatar']['error'] === 0) {
-                        if ($image != null) {
+                        if ($image !== null) {
                             unlink(dirname(__DIR__, 2).'/public/img/avatars/'.$image->getName().'.jpg');
                         }
                         $image = $this->uplodeFile($_FILES['avatar'], $image);
@@ -144,7 +144,7 @@ class UsersController extends AbstractController
                     $user = $this->userVerify($this->getUser()['email']);
     
                     //Si il y a un utilisateur et que le mot de passe ne correspond pas
-                    if (!$bcrypt->verify(htmlspecialchars($_POST['lastPassword']), $user->getPassword())) {
+                    if (! $bcrypt->verify(htmlspecialchars($_POST['lastPassword']), $user->getPassword())) {
                         throw new UserException("L'ancien mot de passe est erronné");
                     }
     
@@ -195,7 +195,7 @@ class UsersController extends AbstractController
                 $handle->image_ratio_y        = true;
                 $handle->process('../public/img/avatars');
                 if ($handle->processed) {
-                    if ($lastImage != null) {
+                    if ($lastImage !== null) {
                         return $lastImage->setName($name)
                                 ->setUpdatedAt(new \DateTime());
                     }
