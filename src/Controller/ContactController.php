@@ -39,9 +39,7 @@ class ContactController extends AbstractController
             }
         }
 
-        return $this->render('contact.html.twig', [
-            'title' => 'Contactez-moi'
-        ]);
+        return $this->redirect('/');
     }
 
     private function getMailler()
