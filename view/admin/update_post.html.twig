@@ -32,7 +32,7 @@
                 <textarea id="intro" class="form-control" name="content" rows="8">{{ post.content }}</textarea>
             </div>
         </div>
-    
+        <input type="hidden" name="_token" value="{{ app.user.token }}">
         <button type="submit" class="btn btn-primary">Sauver</button>
     </form>
 {% endblock %}

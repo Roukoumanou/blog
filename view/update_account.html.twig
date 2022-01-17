@@ -27,6 +27,9 @@
         <div class="mb-3">
           <input type="file" size="32" name="avatar" value="">
         </div>
+
+        <input type="hidden" name="_token" value="{{ app.user.token }}">
+
         <button type="submit" class="btn btn-primary">Modifier</button>
     </form>
 {% endblock %}

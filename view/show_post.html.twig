@@ -52,6 +52,7 @@
                             </div>
                             <!-- an error submitting the form-->
                             <div class="d-none" id="submitErrorMessage"><div class="text-center text-danger mb-3">Error sending message!</div></div>
+                            <input type="hidden" name="_token" value="{{ app.user.token }}">
                             <!-- Submit Button-->
                             <button class="btn btn-primary text-uppercase mt-4" id="submitButton" type="submit">Envoyer</button>
                         </form>
