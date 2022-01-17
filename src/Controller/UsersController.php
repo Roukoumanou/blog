@@ -20,8 +20,6 @@ class UsersController extends AbstractController
 {
     /**
      * Permet de s'inscrire sur le site
-     * 
-     * @var EntityManagerInterface $em
      */
     public function registration()
     {
@@ -47,6 +45,7 @@ class UsersController extends AbstractController
                 }
 
                 // Sinon je sauvegarde le nouveau utilisateur
+                /** @var EntityManagerInterface $em */
                 $em = Manager::getInstance()->getEm();
                 $em->persist($user);
                 $em->flush();
@@ -64,7 +63,6 @@ class UsersController extends AbstractController
 
     /**
      * Permet de modifier son compte
-     * @var EntityManagerInterface $em
      * @var Users $user
      */
     public function updateAccount()
@@ -72,7 +70,7 @@ class UsersController extends AbstractController
         try {
             if ($this->getUser()) {
 
-                if (!empty($_POST)) {
+                if (! empty($_POST) && $this->csrfVerify($_POST)) {
     
                     $user = $this->userVerify(htmlspecialchars($this->getUser()['email']));
                     // Je vérifie si l' utilisateur a changé d'email et que ce mail n'existe déja pas dans la base de donnée
@@ -99,6 +97,7 @@ class UsersController extends AbstractController
                         ->setImages($image);
                     
                     //je sauvegarde l'utilisateur
+                    /** @var EntityManagerInterface $em */
                     $em = Manager::getInstance()->getEm();
                     $em->merge($user);
                     $em->flush();
@@ -130,7 +129,6 @@ class UsersController extends AbstractController
 
     /**
      * Permet de modifier le mot de passe
-     * @var EntityManagerInterface $em
      * @var Users|null $user
      */
     public function updatePassword()
@@ -138,7 +136,7 @@ class UsersController extends AbstractController
         try {
             if ($this->getUser()) {
 
-                if (! empty($_POST)) {
+                if (! empty($_POST) && $this->csrfVerify($_POST)) {
     
                     $bcrypt = new Bcrypt();
                     $user = $this->userVerify($this->getUser()['email']);
@@ -156,6 +154,7 @@ class UsersController extends AbstractController
                     $user->setPassword(htmlspecialchars($_POST['newPassword']));
     
                     //je sauvegarde l'utilisateur
+                    /** @var EntityManagerInterface $em */
                     $em = Manager::getInstance()->getEm();
                     $em->merge($user);
                     $em->flush();
@@ -214,28 +213,24 @@ class UsersController extends AbstractController
     public function login()
     {
         try {
-            if (! empty($_POST)) {
-
+            if (! empty($_POST) && $this->csrfVerify($_POST)) {
                 // Je vérifie si un utilisateur a cet email
                 $user = $this->userVerify(htmlspecialchars($_POST['email']));
                 $bcrypt = new Bcrypt();
-    
+                
                 //Si il y a un utilisateur, je vérifie que son mot de passe est valide
                 if (! empty($user) && $bcrypt->verify(htmlspecialchars($_POST['password']), $user->getPassword())) {
                     
                     // Je met le user dans la session
                     $_SESSION['user'] = [
                         'id' => $user->getId(),
+                        'token' => uniqid('blog'),
                         'firstName' => $user->getFirstName(),
                         'lastName' => $user->getLastName(),
                         'email' => $user->getEmail(),
                         'role' => $user->getRole(),
                         'is_connected' => true
                     ];
-    
-                    if ($user->getRole() === 10) {
-                        return $this->redirect('/admin');
-                    }
                     
                     return $this->redirect('/');
                 }
@@ -259,6 +254,55 @@ class UsersController extends AbstractController
         ]);
     }
 
+        /**
+     * Permet de se connecter sur le site
+     * @var Users|null $user
+     */
+    public function adminLogin()
+    {
+        try {
+            if (! empty($_POST) && $this->csrfVerify($_POST)) {
+
+                // Je vérifie si un utilisateur a cet email
+                $user = $this->userVerify(htmlspecialchars($_POST['email']));
+                $bcrypt = new Bcrypt();
+    
+                //Si il y a un utilisateur, je vérifie que son mot de passe est valide
+                if (! empty($user) && $user->getRole() === Users::ROLE_ADMIN && $bcrypt->verify(htmlspecialchars($_POST['password']), $user->getPassword())) {
+                    
+                    // Je met le user dans la session
+                    $_SESSION['user'] = [
+                        'id' => $user->getId(),
+                        'firstName' => $user->getFirstName(),
+                        'lastName' => $user->getLastName(),
+                        'token' => uniqid('blog_admin'),
+                        'email' => $user->getEmail(),
+                        'role' => $user->getRole(),
+                        'is_connected' => true
+                    ];
+    
+                    return $this->redirect('/admin');
+                }
+        
+                //Si il y a un utilisateur et que le mot de passe ne correspond pas
+                if (!empty($user) && !$bcrypt->verify(htmlspecialchars($_POST['password']), $user->getPassword())) {
+                    throw new UserException("Email ou mot de passe erronné");
+                }
+    
+                // Si un utilisateur ne correspond pas
+                if (empty($user)) {
+                    throw new UserException("Cet email n'est pas sur notre site. Inscrivez vous!");
+                }
+            }
+        } catch (Exception $e) {
+            return (new ExceptionController())->error500($e->getMessage());
+        }
+
+        return $this->render('admin/connexion.html.twig', [
+            'title' => 'Veuillez vous connecter',
+        ]);
+    }
+
     public function profil()
     {
         return $this->render('account.html.twig', [
@@ -275,16 +319,11 @@ class UsersController extends AbstractController
     {
         session_destroy();
 
-        $_SESSION['user'] = [
-            'is_connected' => false
-        ];
-        
         return $this->redirect('/');
     }
 
     /**
      * Permet de verifier si un utilisateur existe
-     * @var EntityManagerInterface $em
      *
      * @param string $email
      */

@@ -50,7 +50,7 @@ class AdminPostsController extends AbstractController
      */
     public function newPost()
     {
-        if (! empty($_POST)) {
+        if (! empty($_POST) && $this->csrfVerify($_POST)) {
             try {
                 $post = new Posts();
 
@@ -60,7 +60,11 @@ class AdminPostsController extends AbstractController
                     ->setStatus($_POST['status'])
                     ->setCreatedBy($this->getUser()['firstName'].' '.$this->getUser()['lastName'])
                     ;
-                
+
+                if ($this->testDoubleTitle($post->getTitle())) {
+                    throw new Exception("Cet Titre est déja utilisé!", 1);
+                }
+
                 //je sauvegarde l'article
                 $em = Manager::getInstance()->getEm();
                 $em->persist($post);
@@ -85,7 +89,7 @@ class AdminPostsController extends AbstractController
     public function updatePost(int $id)
     {
         $post = $this->getPost($id);
-        if (! empty($_POST)) {
+        if (! empty($_POST) && $this->csrfVerify($_POST)) {
             try {
                 $post->setTitle($_POST['title'])
                 ->setIntro($_POST['intro'])
@@ -94,6 +98,10 @@ class AdminPostsController extends AbstractController
                 ->setUpdatedAt(new \DateTime())
                 ->setCreatedBy($this->getUser()['firstName'].' '.$this->getUser()['lastName'])
                 ;
+
+                if ($this->testDoubleTitle($post->getTitle())) {
+                    throw new Exception("Cet Titre est déja utilisé!", 1);
+                }
 
                 //je sauvegarde le post
                 $em = Manager::getInstance()->getEm();
@@ -113,37 +121,36 @@ class AdminPostsController extends AbstractController
         ]);
     }
 
-    /**
-     * @param integer $id
-     */
-    public function viewPost(int $id)
-    {
-        $post = $this->getPost($id);
-        
-        return $this->render('admin/post_view.html.twig', [
-            'title' => $post->getTitle(),
-            'post' => $post
-        ]);
-    }
 
     /**
      * @var EntityManagerInterface $em
+     * @var Posts $post
      *
      * @param integer $id
      */
     public function deletePost(int $id)
     {
-        try {
-            $em = Manager::getInstance()->getEm();
-            $post = $em->find(Posts::class, $id);
-            
-            //Je supprime le post
-            $em->remove($post);
-            $em->flush();
+        if (! empty($_POST) && $this->csrfVerify($_POST)) {
+            try {
+                $em = Manager::getInstance()->getEm();
+                $post = $em->find(Posts::class, $id);
 
-            return $this->redirect('/admin');
-        } catch (Exception $e) {
-            return (new ExceptionController())->error500($e->getMessage());
+                $comments = $post->getCommentes();
+
+                if (count($comments) > 0) {
+                    foreach ($comments as $comment) {
+                        $em->remove($comment);
+                    }
+                }
+                
+                //Je supprime le post
+                $em->remove($post);
+                $em->flush();
+    
+                return $this->redirect('/admin');
+            } catch (Exception $e) {
+                return (new ExceptionController())->error500($e->getMessage());
+            }
         }
     }
 
@@ -156,10 +163,21 @@ class AdminPostsController extends AbstractController
     {
         try {
             $em = Manager::getInstance()->getEm();
-            return $em->getRepository('App\Entity\Posts')->findOneBy(['id' => htmlspecialchars($id)]);
+            return $em->getRepository('App\Entity\Posts')->findOneBy(['id' => $id]);
             
         } catch (Exception $e) {
             return (new ExceptionController())->error500($e->getMessage());
         }
+    }
+
+    private function testDoubleTitle(string $title): bool
+    {
+        $em = Manager::getInstance()->getEm();
+        if ($em->getRepository('App\Entity\Posts')->findOneBy(
+            ['title' => htmlspecialchars($title)])) {
+            return true;
+        };
+
+        return false;
     }
 }

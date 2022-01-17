@@ -67,16 +67,18 @@ class AdminCommentsController extends AbstractController
      */
     public function validedComment(int $id)
     {
-        try {
-            $em = Manager::getInstance()->getEm();
-            $comment = $em->getRepository("App\Entity\Commentes")->findOneBy(['id' => $id]);
-
-            $comment->setIsValid(true);
-
-            $em->merge($comment);
-            $em->flush();
-        } catch (Exception $e) {
-            return (new ExceptionController())->error500($e->getMessage());
+        if (! empty($_POST) && $this->csrfVerify($_POST)) {
+            try {
+                $em = Manager::getInstance()->getEm();
+                $comment = $em->getRepository("App\Entity\Commentes")->findOneBy(['id' => $id]);
+    
+                $comment->setIsValid(true);
+    
+                $em->merge($comment);
+                $em->flush();
+            } catch (Exception $e) {
+                return (new ExceptionController())->error500($e->getMessage());
+            }
         }
 
         return $this->redirect('/admin-comments');

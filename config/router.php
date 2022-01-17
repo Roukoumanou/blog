@@ -7,6 +7,7 @@ use App\Controller\HomeController;
 use App\Controller\UsersController;
 use App\Controller\ContactController;
 use App\Controller\BlogsPostsController;
+use App\Controller\Exception\ExceptionController;
 use App\Controller\Administrator\AdminHomeController;
 use App\Controller\Administrator\AdminPostsController;
 use App\Controller\Administrator\AdminCommentsController;
@@ -16,6 +17,17 @@ use App\Controller\Administrator\AdminCommentsController;
  * Cette page sert de routeur pour tout le site
  * On n'y retrouve les routes de l'application
  */
+
+try{
+    if (! isset($_SESSION['user'])) {
+        $_SESSION['user'] = [
+            'token' => "blog_token_annonymously",
+            'is_connected' => false];
+        
+    }
+} catch (Exception $e) {
+    return (new ExceptionController())->error500($e->getMessage());
+}
 
 $router = new AltoRouter();
 
@@ -42,6 +54,11 @@ $router->map('GET|POST', '/login', function() {
     (new UsersController())->login();
 }, 'login');
 
+// map admin Connect Page
+$router->map('GET|POST', '/admin-login', function() {
+    (new UsersController())->adminLogin();
+}, 'admin_login');
+
 // map homepage
 $router->map('GET|POST', '/contact', function() {
     (new ContactController())->contactMe();
@@ -52,7 +69,7 @@ $router->map('GET', '/logout', function() {
     (new UsersController())->logout();
 }, 'logout');
 
-if (isset($_SESSION['user'])) {
+if ($_SESSION['user']['is_connected'] === true) {
     $user = $_SESSION['user'];
 
     // map user update account Page
@@ -83,7 +100,7 @@ if (isset($_SESSION['user'])) {
             (new AdminPostsController())->updatePost(htmlspecialchars($id));
         }, 'update_post');
 
-        $router->map('GET', '/admin-delete-post-[i:id]', function($id){
+        $router->map('POST', '/admin-delete-post-[i:id]', function($id){
             (new AdminPostsController())->deletePost(htmlspecialchars($id));
         }, 'admin_delete_post');
 
@@ -99,7 +116,7 @@ if (isset($_SESSION['user'])) {
             (new AdminCommentsController())->comment(htmlspecialchars($id));
         }, 'admin_comment');
 
-        $router->map('GET', '/admin-valided-comment-[i:id]', function($id){
+        $router->map('POST', '/admin-valided-comment-[i:id]', function($id){
             (new AdminCommentsController())->validedComment(htmlspecialchars($id));
         }, 'admin_valided_comment');
     }

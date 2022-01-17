@@ -1,6 +1,17 @@
 <?php
 
-session_start();
+// Cokiee Secure for session hijacking
+session_set_cookie_params(
+    0,
+    '/',
+    "localhost:8000",
+    true,
+    true
+);
+
+// Start session
+session_start(['cookie_lifetime' => 86400,]);
+
 require dirname(__DIR__).'/vendor/autoload.php';
 require dirname(__DIR__).'/config/router.php';
 use Dotenv\Dotenv;
