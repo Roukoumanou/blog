@@ -32,6 +32,7 @@
           <input type="checkbox" name="condition" class="form-check-input" id="exampleCheck1" required>
           <label class="form-check-label" for="exampleCheck1">Accepter les conditions</label>
         </div>
+        <input type="hidden" name="_token" value="{{ app.user.token }}">
         <button type="submit" class="btn btn-primary">S'inscrire</button>
     </form>
 {% endblock %}

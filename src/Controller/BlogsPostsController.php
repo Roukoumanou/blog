@@ -14,7 +14,7 @@ use App\Controller\Exception\ExceptionController;
 
 class BlogsPostsController extends AbstractController
 {
-    public function posts($currentPage)
+    public function posts(int $currentPage)
     {
         try {
             /** @var EntityManagerInterface */
@@ -27,8 +27,8 @@ class BlogsPostsController extends AbstractController
             $neighbours = 4;
 
             $pagination = new Pagination($totalItems, $currentPage, $itemsPerPage, $neighbours);
-            $offset = $pagination->offset();
             $limit = $pagination->limit();
+            $offset = $pagination->offset();
 
             $posts = $repo->findBy(
                 ['status' => Posts::PUBLISHED], ['id' => 'DESC'], $limit, $offset);
@@ -46,7 +46,7 @@ class BlogsPostsController extends AbstractController
         ]);
     }
 
-    public function showPost($id)
+    public function showPost(int $id)
     {
         try {
             /** @var EntityManagerInterface */
@@ -57,7 +57,8 @@ class BlogsPostsController extends AbstractController
                 'postId' => $post
             ], ['id' => 'DESC'], 5) ;
             
-            if (! empty($_POST)) {
+            if (! empty($_POST) && $_POST['_token'] === $this->getUser()['token']) {
+                
                 $user = $em->getRepository("App\Entity\Users")->findOneBy(['id' => $this->getUser()['id']]);
                 $comment = new Commentes();
 
@@ -71,13 +72,14 @@ class BlogsPostsController extends AbstractController
 
                 return $this->redirect('/post-'.$post->getId());
             }
+
         } catch (Exception $e) {
             return (new ExceptionController())->error500($e->getMessage());
         }
 
         return $this->render('show_post.html.twig', [
             'title' => $post->getTitle(),
-            'post' => $post,
+            'post'  => $post,
             'commentes' => $commentes
         ]);
     }

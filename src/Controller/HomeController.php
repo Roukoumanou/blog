@@ -12,6 +12,7 @@ class HomeController extends AbstractController
 {
     public function index()
     {
+        //dd($_SESSION);
         return $this->render('home.html.twig', [
             'title' => 'Accueil',
             'myName' => 'Amidou Abdou Roukoumanou',
