@@ -36,6 +36,11 @@ $router->map('GET', '/', function() {
     (new HomeController())->index();
 }, 'home');
 
+// map homepage
+$router->map('GET', '/cv', function() {
+    (new HomeController())->getCv();
+}, 'home_cv');
+
 // map registerpage
 $router->map('GET|POST', '/registration', function() {
     (new UsersController())->registration();
