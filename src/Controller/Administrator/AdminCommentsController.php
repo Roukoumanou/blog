@@ -12,9 +12,9 @@ use Exception;
 class AdminCommentsController extends AbstractController
 {
     /**
-     * @var EntityManagerInterface $em
+     * @param integer $currentPage
      */
-    public function comments($currentPage)
+    public function comments(int $currentPage)
     {
         try {
             $em = Manager::getInstance()->getEm();
@@ -33,6 +33,7 @@ class AdminCommentsController extends AbstractController
                 ['isValid' => false], ['id' => 'ASC'], $limit, $offset);
 
             $pages = $pagination->build();
+            
         } catch (Exception $e) {
             return (new ExceptionController())->error500($e->getMessage());
         }
@@ -45,8 +46,6 @@ class AdminCommentsController extends AbstractController
     }
 
     /**
-     * @var EntityManagerInterface $em
-     *
      * @param integer $id
      */
     public function comment(int $id)
@@ -61,8 +60,6 @@ class AdminCommentsController extends AbstractController
     }
 
     /**
-     * @var EntityManagerInterface $em
-     *
      * @param integer $id
      */
     public function validedComment(int $id)
@@ -76,6 +73,14 @@ class AdminCommentsController extends AbstractController
     
                 $em->merge($comment);
                 $em->flush();
+
+                $this->addFlash(
+                    'success',
+                    'Le commentaire a été validé!'
+                );
+
+                return $this->redirect('/admin-comments');
+
             } catch (Exception $e) {
                 return (new ExceptionController())->error500($e->getMessage());
             }
