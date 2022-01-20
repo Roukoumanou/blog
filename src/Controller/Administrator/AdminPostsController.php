@@ -7,15 +7,14 @@ use App\Entity\Posts;
 use App\Repository\Manager;
 use Kilte\Pagination\Pagination;
 use App\Controller\AbstractController;
-use Doctrine\ORM\EntityManagerInterface;
 use App\Controller\Exception\ExceptionController;
 
 class AdminPostsController extends AbstractController
 {
     /**
-     * @var EntityManagerInterface $em
+     * @param integer $currentPage
      */
-    public function postList($currentPage)
+    public function postList(int $currentPage)
     {
         try {
             $em = Manager::getInstance()->getEm();
@@ -45,9 +44,6 @@ class AdminPostsController extends AbstractController
         ]);
     }
 
-    /**
-     * @var EntityManagerInterface $em
-     */
     public function newPost()
     {
         if (! empty($_POST) && $this->csrfVerify($_POST)) {
@@ -61,16 +57,23 @@ class AdminPostsController extends AbstractController
                     ->setCreatedBy($this->getUser()['firstName'].' '.$this->getUser()['lastName'])
                     ;
 
-                if ($this->testDoubleTitle($post->getTitle())) {
-                    throw new Exception("Cet Titre est déja utilisé!", 1);
-                }
+                    // Je vérifie si le nouveau titre envoyé n'est pas déja utilisé
+                    if ($this->testDoubleTitle($post->getTitle())) {
+                        throw new Exception("Cet Titre est déja utilisé!", 1);
+                    }
 
                 //je sauvegarde l'article
                 $em = Manager::getInstance()->getEm();
                 $em->persist($post);
                 $em->flush();
+
+                $this->addFlash(
+                    'success',
+                    'L\'article a été correctement ajouté!'
+                );
     
-                return $this->redirect("/admin");
+                return $this->redirect("/admin-posts");
+                
             } catch (Exception $e) {
                 return (new ExceptionController())->error500($e->getMessage());
             }
@@ -82,13 +85,12 @@ class AdminPostsController extends AbstractController
     }
 
     /**
-     * @var EntityManagerInterface $em
-     *
      * @param integer $id
      */
     public function updatePost(int $id)
     {
         $post = $this->getPost($id);
+
         if (! empty($_POST) && $this->csrfVerify($_POST)) {
             try {
                 $post->setTitle($_POST['title'])
@@ -99,7 +101,9 @@ class AdminPostsController extends AbstractController
                 ->setCreatedBy($this->getUser()['firstName'].' '.$this->getUser()['lastName'])
                 ;
 
-                if ($this->testDoubleTitle($post->getTitle())) {
+                $testTitle = $this->testDoubleTitle($post->getTitle());
+                // Je vérifie si le nouveau titre envoyé n'est pas déja utilisé
+                if ($post->getId() !== $testTitle->getId()) {
                     throw new Exception("Cet Titre est déja utilisé!", 1);
                 }
 
@@ -108,7 +112,12 @@ class AdminPostsController extends AbstractController
                 $em->merge($post);
                 $em->flush();
 
-                return $this->redirect('/admin');
+                $this->addFlash(
+                    'success',
+                    'L\'article a été correctement modifié! vérifiez...'
+                );
+
+                return $this->redirect('/post-'.$post->getId());
 
             } catch (Exception $e) {
                 return (new ExceptionController())->error500($e->getMessage());
@@ -123,9 +132,6 @@ class AdminPostsController extends AbstractController
 
 
     /**
-     * @var EntityManagerInterface $em
-     * @var Posts $post
-     *
      * @param integer $id
      */
     public function deletePost(int $id)
@@ -146,8 +152,13 @@ class AdminPostsController extends AbstractController
                 //Je supprime le post
                 $em->remove($post);
                 $em->flush();
+
+                $this->addFlash(
+                    'success',
+                    'L\'article a été correctement supprimé!'
+                );
     
-                return $this->redirect('/admin');
+                return $this->redirect('/admin-posts');
             } catch (Exception $e) {
                 return (new ExceptionController())->error500($e->getMessage());
             }
@@ -155,8 +166,6 @@ class AdminPostsController extends AbstractController
     }
 
     /**
-     * @var EntityManagerInterface $em
-     *
      * @param integer $id
      */
     private function getPost(int $id)
@@ -170,14 +179,12 @@ class AdminPostsController extends AbstractController
         }
     }
 
-    private function testDoubleTitle(string $title): bool
+    private function testDoubleTitle(string $title): ?Posts
     {
         $em = Manager::getInstance()->getEm();
-        if ($em->getRepository('App\Entity\Posts')->findOneBy(
-            ['title' => htmlspecialchars($title)])) {
-            return true;
-        };
+        $post = $em->getRepository('App\Entity\Posts')->findOneBy(
+            ['title' => htmlspecialchars($title)]);
 
-        return false;
+        return $post;
     }
 }

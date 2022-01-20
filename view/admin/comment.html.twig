@@ -15,21 +15,11 @@
                             {{ comment.content|nl2br }}<br />
                         </div>
                         <hr />
+                        <form method="post" action="/admin-valided-comment-{{ comment.id }}" onsubmit="return confirm('Êtes-vous sûr de bien vouloir valider ce commentaire ?');">
+                            <input type="hidden" name="_token" value="{{ app.user.token }}">
+                            <button class="btn btn-outline-danger btn-sm">Valider</button>
+                        </form>
                     </div>
-                </div>
-
-                <div class="my-5">
-                    <form method="post" action='/post-{{ comment.postId.id }}'>
-                        <div class="form-floating border">
-                            <textarea class="form-control" name="message" id="message" required placeholder="Entrez votre commentaire ici..." style="height: 12rem" data-sb-validations="required"></textarea>
-                            <label for="message">Ajouter un Commentaire</label>
-                            <div class="invalid-feedback" data-sb-feedback="message:required">Ce champs est obligatoire s'il vous plait.</div>
-                        </div>
-                        <!-- an error submitting the form-->
-                        <div class="d-none" id="submitErrorMessage"><div class="text-center text-danger mb-3">Error sending message!</div></div>
-                        <!-- Submit Button-->
-                        <button class="btn btn-primary text-uppercase mt-4" id="submitButton" type="submit">Envoyer</button>
-                    </form>
                 </div>
             </div>
         </div>

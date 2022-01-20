@@ -50,7 +50,12 @@ class UsersController extends AbstractController
                 $em->persist($user);
                 $em->flush();
 
-                return $this->redirect('/');
+                $this->addFlash(
+                    'success',
+                    'Bienvenu parmi nous!'
+                );
+
+                return $this->redirect('/login');
             }
         } catch (Exception $e) {
             return (new ExceptionController())->error500($e->getMessage());
@@ -105,12 +110,18 @@ class UsersController extends AbstractController
                     // Je met a jour le user dans la session
                     $_SESSION['user'] = [
                         'id' => $user->getId(),
+                        'token' => uniqid('blog'),
                         'firstName' => $user->getFirstName(),
                         'lastName' => $user->getLastName(),
                         'email' => $user->getEmail(),
                         'role' => $user->getRole(),
                         'is_connected' => true
                     ];
+
+                    $this->addFlash(
+                        'success',
+                        'Votre profile a été correctement modifié!'
+                    );
     
                     return $this->redirect('/profil');
                     
@@ -158,10 +169,13 @@ class UsersController extends AbstractController
                     $em = Manager::getInstance()->getEm();
                     $em->merge($user);
                     $em->flush();
+
+                    $this->addFlash(
+                        'success',
+                        'Votre mot de passe a été correctement modifié !'
+                    );
     
-                    session_destroy();
-    
-                    return $this->redirect('/');
+                    return $this->redirect('/profil');
                 }
             
                 return $this->render('update_password.html.twig', [
@@ -221,6 +235,8 @@ class UsersController extends AbstractController
                 //Si il y a un utilisateur, je vérifie que son mot de passe est valide
                 if (! empty($user) && $bcrypt->verify(htmlspecialchars($_POST['password']), $user->getPassword())) {
                     
+                    // J'initialise le flash bag
+                    $_SESSION['flashes'] = [];
                     // Je met le user dans la session
                     $_SESSION['user'] = [
                         'id' => $user->getId(),
@@ -254,7 +270,7 @@ class UsersController extends AbstractController
         ]);
     }
 
-        /**
+    /**
      * Permet de se connecter sur le site
      * @var Users|null $user
      */
@@ -273,9 +289,9 @@ class UsersController extends AbstractController
                     // Je met le user dans la session
                     $_SESSION['user'] = [
                         'id' => $user->getId(),
+                        'token' => uniqid('blog_admin'),
                         'firstName' => $user->getFirstName(),
                         'lastName' => $user->getLastName(),
-                        'token' => uniqid('blog_admin'),
                         'email' => $user->getEmail(),
                         'role' => $user->getRole(),
                         'is_connected' => true

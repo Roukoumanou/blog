@@ -10,7 +10,7 @@ session_set_cookie_params(
 );
 
 // Start session
-session_start(['cookie_lifetime' => 86400,]);
+session_start();
 
 require dirname(__DIR__).'/vendor/autoload.php';
 require dirname(__DIR__).'/config/router.php';

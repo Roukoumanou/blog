@@ -23,6 +23,8 @@ abstract class AbstractController
         $twig->addGlobal('app', $_SESSION);
 
         echo $twig->render($tmp, $option);
+
+        $_SESSION['flashes'] = [];
     }
 
     protected function getUser()
@@ -32,6 +34,20 @@ abstract class AbstractController
         }
 
         return null;
+    }
+
+    /**
+     * Permet de rajouter une petite notification
+     *
+     * @param string $label
+     * @param string $message
+     * @return void
+     */
+    protected function addFlash($label, $message): void
+    {
+        $_SESSION['flashes'] = [
+            $label => [$message]
+        ];
     }
 
     /**
