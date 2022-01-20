@@ -32,6 +32,11 @@ class ContactController extends AbstractController
                 
                 $mail->send();
 
+                $this->addFlash(
+                    'success',
+                    'Merci pour votre message. Je vous reviens le plus tôt possible !'
+                );
+
                 return $this->redirect('/');
                 
             } catch (Exception $e) {
@@ -46,7 +51,6 @@ class ContactController extends AbstractController
     {
         $mail = new PHPMailer(true);
         try {
-            $mail->SMTPDebug = SMTP::DEBUG_SERVER;
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
