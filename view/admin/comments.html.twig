@@ -14,32 +14,40 @@
             <th scope="col">created At</th>
           </tr>
         </thead>
+        {% if comments|length > 0 %}
         <tbody>
-          {% for comment in comments %}
+            {% for comment in comments %}
+              <tr>
+                  <th scope="row">{{ comment.id}}</th>
+                  <td>{{ comment.postId.title }}</td>
+                  <td>{{ comment.isValid ? "Valid" : "Not Valided" }}</td>
+                  <td>{{ comment.createdAt|date("d m Y") }}</td>
+                  <td>
+                      <a class="btn btn-outline-primary btn-sm" href="/admin-comment-{{ comment.id }}">Voir</a>
+                  </td>
+                  <td>
+                    <form method="post" action="/admin-valided-comment-{{ comment.id }}" onsubmit="return confirm('Êtes-vous sûr de bien vouloir valider ce commentaire ?');">
+                      <input type="hidden" name="_token" value="{{ app.user.token }}">
+                      <button class="btn btn-outline-danger btn-sm">Valider</button>
+                    </form>
+                  </td>
+              </tr>
+            {% endfor %}
+            {% else %}
             <tr>
-                <th scope="row">{{ comment.id}}</th>
-                <td>{{ comment.postId.title }}</td>
-                <td>{{ comment.isValid ? "Valid" : "Not Valided" }}</td>
-                <td>{{ comment.createdAt|date("d m Y") }}</td>
-                <td>
-                    <a class="btn btn-outline-primary btn-sm" href="/admin-comment-{{ comment.id }}">Voir</a>
-                </td>
-                <td>
-                  <form method="post" action="/admin-valided-comment-{{ comment.id }}" onsubmit="return confirm('Êtes-vous sûr de bien vouloir valider ce commentaire ?');">
-                    <input type="hidden" name="_token" value="{{ app.user.token }}">
-                    <button class="btn btn-outline-danger btn-sm">Valider</button>
-                  </form>
-                </td>
+              <td>
+                <p>Pas de commentaires a valider</p>
+              </td>
             </tr>
+            {% endif %}
+          </tbody>
+      </table>
+      <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+          <li class="page-link">Pages</li>
+          {% for key, page in pages %}
+            <li class="page-item"><a class="page-link {% if page == "current" %} text-danger {% endif %}" href="/admin-comments{{ key }}">{{ key }}</a></li>
           {% endfor %}
-        </tbody>
-    </table>
-    <nav aria-label="Page navigation example">
-      <ul class="pagination justify-content-center">
-        <li class="page-link">Pages</li>
-        {% for key, page in pages %}
-          <li class="page-item"><a class="page-link {% if page == "current" %} text-danger {% endif %}" href="/admin-comments{{ key }}">{{ key }}</a></li>
-        {% endfor %}
-      </ul>
-    </nav>
+        </ul>
+      </nav>
 {% endblock %}

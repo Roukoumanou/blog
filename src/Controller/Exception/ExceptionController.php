@@ -16,7 +16,11 @@ class ExceptionController extends AbstractController
      */
     public function error404()
     {
-        return $this->render('exception/404.html.twig', ['title' => 'Impossible de trouver cette page']);
+        return $this->render('exception/404.html.twig', [
+            'title' => '<div class="alert alert-danger text-center" role="alert">
+                    Impossible de trouver cette page <br > 
+                    <a class="btn btn-primary" href="/">Retour à la page d\'accueil</a>
+                    </div>']);
     }
 
     /**
@@ -24,6 +28,11 @@ class ExceptionController extends AbstractController
      */
     public function error500($message)
     {
-        return $this->render('exception/500.html.twig', ['title' => $message]);
+        return $this->render('exception/500.html.twig', [
+            'title' => '<div class="alert alert-danger text-center" role="alert">
+                    '.$message.' <br > 
+                    <a class="btn btn-primary mt-4" href="/">Retour à la page d\'accueil</a>
+                    </div>'
+        ]);
     }
 }

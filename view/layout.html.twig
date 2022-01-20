@@ -44,13 +44,32 @@
             </div>
         </header>
 
+        <div class="col-12">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                        <symbol id="info-fill" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                        </symbol>
+                    </svg>
+                    <div class="alert alert-dismissible fade show alert-{{ label }} d-flex align-items-center" role="alert">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
+                            {{ message|raw }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        
+        {% block allert %}
+        {% endblock %}
+
         {% block body %}{% endblock %}
     </div>
 
     <footer class="border-top mt-4">
         <div class="container px-4 px-lg-5">
             <div class="row gx-4 gx-lg-5 justify-content-center">
-                <div class="small mb-3 text-center text-muted fst-italic"><a href="/admin-login">Accès administrateur</a></div>
                 
                 <div class="col-md-10 col-lg-8 col-xl-7">
                     <ul class="list-inline text-center">
@@ -82,6 +101,7 @@
                     <div class="small text-center text-muted fst-italic">&copy; Roukoumanou 2021</div>
                 </div>
             </div>
+            <div class="m-3 text-center fst-italic"><a class="btn btn-outline-warning" href="/admin-login">Administrateur</a></div>
         </div>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>

@@ -12,15 +12,11 @@ class HomeController extends AbstractController
 {
     public function index()
     {
+        //dd($_SESSION);
         return $this->render('home.html.twig', [
             'title' => 'Accueil',
             'myName' => 'Amidou Abdou Roukoumanou',
             'description' => 'Consultant Expert Developpeur Web'
         ]);
-    }
-
-    public function getCv()
-    {
-        return $this->render('cv.html.twig');
     }
 }

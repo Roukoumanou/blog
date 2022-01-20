@@ -51,6 +51,7 @@ class BlogsPostsController extends AbstractController
         try {
             /** @var EntityManagerInterface */
             $em = Manager::getInstance()->getEm();
+
             $post = $em->getRepository("App\Entity\Posts")->findOneBy(['id' => $id]);
             $commentes = $em->getRepository("App\Entity\Commentes")->findBy([
                 'isValid' => true,
@@ -69,6 +70,11 @@ class BlogsPostsController extends AbstractController
                 $post->addCommentes($comment);
                 $em->persist($comment);
                 $em->flush();
+
+                $this->addFlash(
+                    'success',
+                    'Merci pour le commentaire ! il est en attente de validation !'
+                );
 
                 return $this->redirect('/post-'.$post->getId());
             }
