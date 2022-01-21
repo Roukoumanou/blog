@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Dotenv\Dotenv;
 use App\Controller\AbstractController;
+
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
  * Affiche la page d'accueil du site
@@ -12,7 +12,6 @@ class HomeController extends AbstractController
 {
     public function index()
     {
-        //dd($_SESSION);
         return $this->render('home.html.twig', [
             'title' => 'Accueil',
             'myName' => 'Amidou Abdou Roukoumanou',
