@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use Dotenv\Dotenv;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 
@@ -38,6 +39,10 @@ class Manager
         $useSimpleAnnotationReader = false;
 
         $config = Setup::createAnnotationMetadataConfiguration(array(dirname(__DIR__)."/Entity"), $isDevMode, $proxyDir, $cache, $useSimpleAnnotationReader);
+        
+        $dotenv = Dotenv::createImmutable(dirname(__DIR__, 2));
+        $dotenv->load();
+        $dotenv->required(['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASS', 'DB_DRIVER', 'MAIL_USERNAME', 'MAIL_PASSWORD']);
 
         // database configuration parameters
         $conn = array(
