@@ -19,7 +19,8 @@
         "symfony/cache": "^5.3",
         "league/oauth2-client": "^2.6",
         "phpmailer/phpmailer": "^6.5",
-        "amstaffix/pagination": "^1.1"
+        "amstaffix/pagination": "^1.1",
+        "doctrine/migrations": "^3.4"
     },
     "autoload": {
         "psr-4": {
