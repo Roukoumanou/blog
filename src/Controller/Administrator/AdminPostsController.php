@@ -123,27 +123,4 @@ class AdminPostsController extends AbstractController
             'post' => $lastPost
         ]);
     }
-
-
-    /**
-     * @param integer $id
-     */
-    public function deletePost(int $id)
-    {
-        if (! empty($_POST) && $this->csrfVerify($_POST)) {
-            try {
-                //Je supprime le post
-                (new PostsManager())->delete($id);
-
-                $this->addFlash(
-                    'success',
-                    'L\'article a été correctement supprimé!'
-                );
-    
-                return $this->redirect('/admin-posts');
-            } catch (Exception $e) {
-                return (new ExceptionController())->error500($e->getMessage());
-            }
-        }
-    }
 }

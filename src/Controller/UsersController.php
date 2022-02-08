@@ -28,7 +28,6 @@ class UsersController extends AbstractController
 
                 // Je traite l'image envoyée
                 $image = $this->uplodeFile($_FILES['avatar']);
-
                 // Je procède à la validation des données 
                 $user = new Users();
                 $user->setFirstName($_POST['firstName'])
