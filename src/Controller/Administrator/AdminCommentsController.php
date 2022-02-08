@@ -2,11 +2,9 @@
 
 namespace App\Controller\Administrator;
 
-use App\Repository\Manager;
 use Kilte\Pagination\Pagination;
 use App\Controller\AbstractController;
 use App\Controller\Exception\ExceptionController;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
 class AdminCommentsController extends AbstractController
@@ -17,11 +15,12 @@ class AdminCommentsController extends AbstractController
     public function comments(int $currentPage)
     {
         try {
-            $em = Manager::getInstance()->getEm();
+            $em = $this->getDB();
+            $result = $em->prepare("SELECT * FROM commentes WHERE is_valid = :not_valid");
+            $result->execute([':not_valid' => false]);
+            $commentes = $result->fetchAll();
 
-            $repo = $em->getRepository("App\Entity\Commentes");
-
-            $totalItems = count($repo->findBy(['isValid' => false]));
+            $totalItems = count($commentes);
             $itemsPerPage = 2;
             $neighbours = 4;
 
@@ -29,8 +28,9 @@ class AdminCommentsController extends AbstractController
             $offset = $pagination->offset();
             $limit = $pagination->limit();
 
-            $comments = $repo->findBy(
-                ['isValid' => false], ['id' => 'ASC'], $limit, $offset);
+            $req = $em->prepare("SELECT * FROM commentes WHERE is_valid = :not_valid ORDER BY id ASC LIMIT $limit OFFSET $offset");
+            $req->execute([':not_valid' => false]);
+            $comments = $req->fetchAll();
 
             $pages = $pagination->build();
             
@@ -50,11 +50,13 @@ class AdminCommentsController extends AbstractController
      */
     public function comment(int $id)
     {
-        $em = Manager::getInstance()->getEm();
-        $comment = $em->getRepository("App\Entity\Commentes")->findOneBy(['id' => $id]);
+        $em = $this->getDB();
+            $result = $em->prepare("SELECT * FROM commentes WHERE id = :id");
+            $result->execute([':id' => $id]);
+            $comment = $result->fetch();
 
         return $this->render('admin/comment.html.twig', [
-            'title' => 'Commentaire de l\'article n° '.$comment->getPostId()->getId(),
+            'title' => 'Commentaire a valider n° '.$comment['id'],
             'comment' => $comment
         ]);
     }
@@ -66,13 +68,12 @@ class AdminCommentsController extends AbstractController
     {
         if (! empty($_POST) && $this->csrfVerify($_POST)) {
             try {
-                $em = Manager::getInstance()->getEm();
-                $comment = $em->getRepository("App\Entity\Commentes")->findOneBy(['id' => $id]);
-    
-                $comment->setIsValid(true);
-    
-                $em->merge($comment);
-                $em->flush();
+                $em = $this->getDB();
+                $result = $em->prepare("UPDATE commentes SET is_valid = :is_valid WHERE id = :id");
+                $result->execute([
+                    ':id' => $id,
+                    ':is_valid' => true
+                ]);
 
                 $this->addFlash(
                     'success',

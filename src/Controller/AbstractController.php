@@ -1,14 +1,15 @@
-<?php 
+<?php
+
 namespace App\Controller;
 
-use Slim\Csrf\Guard;
 use Twig\Environment;
+use App\Models\Manager;
 use Twig\Loader\FilesystemLoader;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
  */
-abstract class AbstractController
+abstract class AbstractController extends Manager
 {   
     /**
      * Renvois la vue twig d'une page du site
@@ -73,5 +74,10 @@ abstract class AbstractController
         }
 
         return false;
+    }
+
+    protected function getDB()
+    {
+        return Manager::getInstance()->getEm();
     }
 }

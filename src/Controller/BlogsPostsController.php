@@ -14,15 +14,19 @@ use App\Controller\Exception\ExceptionController;
 
 class BlogsPostsController extends AbstractController
 {
+    /**
+     * @param integer $currentPage
+     */
     public function posts(int $currentPage)
     {
         try {
-            /** @var EntityManagerInterface */
-            $em = Manager::getInstance()->getEm();
+            $em = $this->getDB();
+            $sql = 'SELECT * FROM posts WHERE status = :public';
+            $result = $em->prepare($sql);
+            $result->execute([':public' => Posts::PUBLISHED]);
+            $posts = $result->fetchAll();
 
-            $repo = $em->getRepository("App\Entity\Posts");
-            
-            $totalItems = count($repo->findBy(['status' => Posts::PUBLISHED]));
+            $totalItems = count($posts);
             $itemsPerPage = 2;
             $neighbours = 4;
 
@@ -30,8 +34,10 @@ class BlogsPostsController extends AbstractController
             $limit = $pagination->limit();
             $offset = $pagination->offset();
 
-            $posts = $repo->findBy(
-                ['status' => Posts::PUBLISHED], ['id' => 'DESC'], $limit, $offset);
+            $req = $em->prepare($sql.' ORDER BY id DESC LIMIT '.$limit.' OFFSET '.$offset);
+            $req->execute([':public' => Posts::PUBLISHED]);
+
+            $posts = $req->fetchAll();
 
             $pages = $pagination->build();
             
@@ -49,34 +55,45 @@ class BlogsPostsController extends AbstractController
     public function showPost(int $id)
     {
         try {
-            /** @var EntityManagerInterface */
-            $em = Manager::getInstance()->getEm();
-
-            $post = $em->getRepository("App\Entity\Posts")->findOneBy(['id' => $id]);
-            $commentes = $em->getRepository("App\Entity\Commentes")->findBy([
-                'isValid' => true,
-                'postId' => $post
-            ], ['id' => 'DESC'], 5) ;
             
+            $em = $this->getDB();
+
+            // Je recupère l'article
+            $sql = "SELECT * FROM posts WHERE id = :id";
+            $result = $em->prepare($sql);
+            $result->execute([':id' => $id]);
+            $post = $result->fetch();
+
+            // Je recupère les commentaire de ce poste
+            $req = $em->prepare("SELECT * FROM commentes WHERE is_valid = true AND post_id = :post");
+            $req->execute([':post' => $post['id']]);
+            $commentes = $req->fetchAll();
+
             if (! empty($_POST) && $_POST['_token'] === $this->getUser()['token']) {
                 
-                $user = $em->getRepository("App\Entity\Users")->findOneBy(['id' => $this->getUser()['id']]);
+                $user = $this->getUser()['id'];
                 $comment = new Commentes();
 
-                $comment->setPostId($post)
+                $comment->setPostId($post['id'])
                     ->setUserId($user)
                     ->setContent($_POST['message']);
-                
-                $post->addCommentes($comment);
-                $em->persist($comment);
-                $em->flush();
+
+                $req = $em->prepare("INSERT INTO commentes (post_id, user_id, content, is_valid, created_at)
+                                        VALUES (:post_id, :user_id, :content, :is_valid, :created_at)");
+                $req->execute([
+                    ':post_id' => $comment->getPostId(),
+                    ':user_id' => $comment->getUserId(),
+                    ':content' => $comment->getContent(),
+                    ':is_valid' => 0,
+                    ':created_at' => date_format($comment->getCreatedAt(), 'Y-m-d')
+                ]);
 
                 $this->addFlash(
                     'success',
                     'Merci pour le commentaire ! il est en attente de validation !'
                 );
 
-                return $this->redirect('/post-'.$post->getId());
+                return $this->redirect('/post-'.$post['id']);
             }
 
         } catch (Exception $e) {
@@ -84,7 +101,7 @@ class BlogsPostsController extends AbstractController
         }
 
         return $this->render('show_post.html.twig', [
-            'title' => $post->getTitle(),
+            'title' => $post['title'],
             'post'  => $post,
             'commentes' => $commentes
         ]);

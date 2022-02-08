@@ -17,22 +17,27 @@ class AdminPostsController extends AbstractController
     public function postList(int $currentPage)
     {
         try {
-            $em = Manager::getInstance()->getEm();
+            $em = $this->getDB();
+            $sql = 'SELECT * FROM posts';
+            $result = $em->prepare($sql);
+            $result->execute([]);
+            $posts = $result->fetchAll();
 
-            $repo = $em->getRepository("App\Entity\Posts");
-
-            $totalItems = count($repo->findAll());
+            $totalItems = count($posts);
             $itemsPerPage = 2;
             $neighbours = 4;
 
             $pagination = new Pagination($totalItems, $currentPage, $itemsPerPage, $neighbours);
-            $offset = $pagination->offset();
             $limit = $pagination->limit();
+            $offset = $pagination->offset();
 
-            $posts = $repo->findBy(
-                [], ['id' => 'DESC'], $limit, $offset);
+            $req = $em->prepare($sql.' ORDER BY id DESC LIMIT '.$limit.' OFFSET '.$offset);
+            $req->execute([':public' => Posts::PUBLISHED]);
+
+            $posts = $req->fetchAll();
 
             $pages = $pagination->build();
+            
         } catch (Exception $e) {
             return (new ExceptionController())->error500($e->getMessage());
         }
@@ -63,9 +68,18 @@ class AdminPostsController extends AbstractController
                     }
 
                 //je sauvegarde l'article
-                $em = Manager::getInstance()->getEm();
-                $em->persist($post);
-                $em->flush();
+                $em = $this->getDb();
+                $result = $em->prepare("INSERT INTO posts (title, intro, status, content, created_by, created_at, updated_at)
+                            VALUES (:title, :intro, :status, :content, :created_by, :created_at, :updated_at)");
+                $result->execute([
+                    ':title' => $post->getTitle(),
+                    ':intro' => $post->getIntro(),
+                    ':status' => $post->getStatus(),
+                    ':content' => $post->getContent(),
+                    ':created_by' => $post->getCreatedBy(),
+                    ':created_at' => date_format($post->getCreatedAt(), 'Y-m-d'),
+                    ':updated_at' => date_format($post->getUpdatedAt(), 'Y-m-d')
+                ]);
 
                 $this->addFlash(
                     'success',
@@ -89,35 +103,42 @@ class AdminPostsController extends AbstractController
      */
     public function updatePost(int $id)
     {
-        $post = $this->getPost($id);
+        $lastPost = $this->getPost($id);
 
         if (! empty($_POST) && $this->csrfVerify($_POST)) {
             try {
-                $post->setTitle($_POST['title'])
-                ->setIntro($_POST['intro'])
-                ->setContent($_POST['content'])
-                ->setStatus($_POST['status'])
-                ->setUpdatedAt(new \DateTime())
-                ->setCreatedBy($this->getUser()['firstName'].' '.$this->getUser()['lastName'])
-                ;
-
+                $post = (new Posts())
+                    ->setTitle($_POST['title'])
+                    ->setIntro($_POST['intro'])
+                    ->setContent($_POST['content'])
+                    ->setStatus($_POST['status'])
+                    ->setUpdatedAt(new \DateTime())
+                    ;
                 $testTitle = $this->testDoubleTitle($post->getTitle());
                 // Je vérifie si le nouveau titre envoyé n'est pas déja utilisé
-                if ($post->getId() !== $testTitle->getId()) {
+                if (!empty($testTitle) && $lastPost['id'] !== $testTitle['id']) {
                     throw new Exception("Cet Titre est déja utilisé!", 1);
                 }
-
+                
                 //je sauvegarde le post
-                $em = Manager::getInstance()->getEm();
-                $em->merge($post);
-                $em->flush();
+                $em = $this->getDB();
+                $result = $em->prepare("UPDATE posts SET title = :title, intro = :intro, status = :status, content = :content, updated_at = :updated_at
+                                        WHERE id = :id");
+                $result->execute([
+                    ':id' => $lastPost['id'],
+                    ':title' => $post->getTitle(),
+                    ':intro' => $post->getIntro(),
+                    ':status' => $post->getStatus(),
+                    ':content' => $post->getContent(),
+                    ':updated_at' => date_format($post->getUpdatedAt(), 'Y-m-d')
+                ]);
 
                 $this->addFlash(
                     'success',
                     'L\'article a été correctement modifié! vérifiez...'
                 );
 
-                return $this->redirect('/post-'.$post->getId());
+                return $this->redirect('/post-'.$lastPost['id']);
 
             } catch (Exception $e) {
                 return (new ExceptionController())->error500($e->getMessage());
@@ -126,7 +147,7 @@ class AdminPostsController extends AbstractController
 
         return $this->render('admin/update_post.html.twig', [
             'title' => 'Modifier ce blog post',
-            'post' => $post
+            'post' => $lastPost
         ]);
     }
 
@@ -136,23 +157,22 @@ class AdminPostsController extends AbstractController
      */
     public function deletePost(int $id)
     {
+        $lastPost = $this->getPost($id);
+        var_dump($lastPost);
+
         if (! empty($_POST) && $this->csrfVerify($_POST)) {
             try {
-                $em = Manager::getInstance()->getEm();
-                $post = $em->find(Posts::class, $id);
+                $em = $this->getDB();
+                $comment = $em->prepare("DELETE FROM commentes WHERE post_id = :id");
+                $comment->execute(['id' => $id]);
 
-                $comments = $post->getCommentes();
+                $post = $em->prepare("DELETE FROM posts WHERE id = :id");
+                $post->execute([':id' => $id]);
 
-                if (count($comments) > 0) {
-                    foreach ($comments as $comment) {
-                        $em->remove($comment);
-                    }
-                }
-                
+
+
                 //Je supprime le post
-                $em->remove($post);
-                $em->flush();
-
+                
                 $this->addFlash(
                     'success',
                     'L\'article a été correctement supprimé!'
@@ -171,20 +191,25 @@ class AdminPostsController extends AbstractController
     private function getPost(int $id)
     {
         try {
-            $em = Manager::getInstance()->getEm();
-            return $em->getRepository('App\Entity\Posts')->findOneBy(['id' => $id]);
+            $em = $this->getDB();
+            $result = $em->prepare("SELECT * FROM posts WHERE id = :id");
+            $result->execute([':id' => $id]);
+
+            $response = $result->fetch();
+            return $response;
             
         } catch (Exception $e) {
             return (new ExceptionController())->error500($e->getMessage());
         }
     }
 
-    private function testDoubleTitle(string $title): ?Posts
+    private function testDoubleTitle(string $title)
     {
-        $em = Manager::getInstance()->getEm();
-        $post = $em->getRepository('App\Entity\Posts')->findOneBy(
-            ['title' => htmlspecialchars($title)]);
+        $em = $this->getDB();
+        $result = $em->prepare("SELECT * FROM posts WHERE title = :title");
+        $result->execute([':title' => $title]);
 
-        return $post;
+        $response = $result->fetch();
+        return $response;
     }
 }
