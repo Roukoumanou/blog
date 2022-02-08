@@ -6,16 +6,10 @@ namespace App\Entity;
 
 use App\Entity\Commentes;
 use Zend\Crypt\Password\Bcrypt;
-use Doctrine\ORM\Mapping as ORM;
 use App\Exception\NotNullException;
-use App\Repository\UsersRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
- * @ORM\Entity(repositoryClass=UsersRepository::class)
- * @ORM\Table(name="users")
  */
 class Users
 {
@@ -23,79 +17,52 @@ class Users
     public const ROLE_USER  = 11;
     
     /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue
-     *
      * @var integer
      */
     private int $id;
 
     /**
-     * @ORM\Column(type="string", name="first_name")
-     *
      * @var string
      */
     private string $firstName;
 
     /**
-     * @ORM\Column(type="string", name="last_name")
-     *
      * @var string
      */
     private string $lastName;
 
     /**
-     * @ORM\Column(type="string", unique=true)
-     *
      * @var string
      */
     private string $email;
 
     /**
-     * @ORM\Column(type="string")
-     *
      * @var string
      */
     private string $password;
 
     /**
-     * @ORM\Column(type="integer")
-     *
      * @var integer
      */
     private int $role = self::ROLE_USER;
 
     /**
-     * @ORM\Column(type="boolean", name="is_valid")
-     *
      * @var bool
      */
     private $isValid = false;
 
     /**
-     * @ORM\Column(type="date", name="created_at")
-     *
      * @var \DateTimeInterface
      */
     private \DateTimeInterface $createdAt;
 
     /**
-     * @ORM\Column(type="date", name="updated_at", nullable=true)
-     *
      * @var \DateTimeInterface
      */
     private \DateTimeInterface $updatedAt;
 
-    /**
-     * @ORM\OneToOne(targetEntity="Images", cascade={"persist", "remove", "merge"})
-     * @ORM\JoinColumn(name="images_id", referencedColumnName="id", nullable=true)
-     */
-    private $images;
+    private int $images;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Commentes", mappedBy="userId")
-     */
     private $commentes;
 
     public function __construct()
@@ -105,8 +72,6 @@ class Users
         }else{
             $this->updatedAt = new \DateTime();
         }
-
-        $this->commentes = new ArrayCollection();
     }
 
     /**
@@ -301,7 +266,7 @@ class Users
     /**
      * Get the value of images
      */ 
-    public function getImages(): ?Images
+    public function getImages(): ?int
     {
         return $this->images;
     }
@@ -311,7 +276,7 @@ class Users
      *
      * @return  self
      */ 
-    public function setImages(?Images $images): self
+    public function setImages(?int $images): self
     {
         $this->images = $images;
 
@@ -324,26 +289,8 @@ class Users
      */
     public function addCommentes(Commentes $commente): self
     {
-        if (! $this->commentes->contains($commente)) {
-            $this->commentes[] = $commente;
-            $commente->setUserId($this);
-        }
 
         return $this;
     }
 
-    public function removeCommente(Commentes $commente): self
-    {
-        $this->commentes->removeElement($commente);
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Commentes
-     */
-    public function getCommentes(): Collection
-    {
-        return $this->commentes;
-    }
 }

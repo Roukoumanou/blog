@@ -3,19 +3,10 @@
 namespace App\Entity;
 
 use App\Entity\Commentes;
-use Doctrine\ORM\Mapping as ORM;
 use App\Exception\NotNullException;
-use App\Repository\PostsRepository;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
-use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * classe entité des blogs posts
- * 
- * @ORM\Entity(repositoryClass=PostsRepository::class)
- * @ORM\Table(name="posts")
- * @HasLifecycleCallbacks
  * 
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
  */
@@ -25,67 +16,44 @@ class Posts
     public const DRAFT = 30;
 
     /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue
-     *
      * @var integer
      */
     private int $id;
 
     /**
-     * @ORM\Column(type="string", name="title", unique=true)
-     *
      * @var string
      */
     private string $title;
 
     /**
-     * @ORM\Column(type="string", length=200, name="intro")
-     *
      * @var string
      */
     private string $intro;
 
     /**
-     * @ORM\Column(type="integer", name="status")
-     *
      * @var int
      */
     private int $status = self::DRAFT;
 
     /**
-     * @ORM\Column(type="text", name="content")
-     *
      * @var string
      */
     private $content;
 
     /**
-     * @ORM\Column(type="string", name="created_by")
-     *
      * @var string
      */
     private string $createdBy;
 
     /**
-     * @ORM\Column(type="date", name="created_at")
-     *
      * @var \DateTimeInterface
      */
     private \DateTimeInterface $createdAt;
 
     /**
-     * @ORM\Column(type="date", name="updated_at", nullable=true)
-     *
      * @var \DateTimeInterface
      */
     private \DateTimeInterface $updatedAt;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Commentes", mappedBy="postId")
-     */
-    private $commentes;
 
     public function __construct()
     {
@@ -93,8 +61,6 @@ class Posts
             $this->createdAt = new \DateTime();
             $this->updatedAt = new \DateTime();
         }
-
-        $this->commentes = new ArrayCollection();
     }
 
     /**
@@ -276,35 +242,6 @@ class Posts
         $this->createdAt = $createdAt;
 
         return $this;
-    }
-
-    /**
-     * @param Commentes $commente
-     * @return self
-     */
-    public function addCommentes(Commentes $commente): self
-    {
-        if (! $this->commentes->contains($commente)) {
-            $this->commentes[] = $commente;
-            $commente->setPostId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCommente(Commentes $commente): self
-    {
-        $this->commentes->removeElement($commente);
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Commentes
-     */
-    public function getCommentes(): Collection
-    {
-        return $this->commentes;
     }
 
     private function notNull(string $champ, string $message)

@@ -19,7 +19,10 @@ use App\Controller\Administrator\AdminCommentsController;
  */
 
 try{
-    if (! isset($_SESSION['user'])) {
+
+    // Start session
+    session_start(['cookie_lifetime' => 86400]);
+    if (!isset($_SESSION['user'])) {
         $_SESSION['user'] = [
             'token' => "blog_token_annonymously",
             'is_connected' => false];
@@ -86,7 +89,7 @@ if ($_SESSION['user']['is_connected'] === true) {
         (new UsersController())->updatePassword();
     }, 'password_update');
 
-    if ($user['role'] === Users::ROLE_ADMIN) {
+    if ($user['role'] == Users::ROLE_ADMIN) {
         // map admin homepage
         $router->map('GET', '/admin', function() {
             (new AdminHomeController())->adminIndex();

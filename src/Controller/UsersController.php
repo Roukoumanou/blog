@@ -4,13 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Users;
 use App\Entity\Images;
-use App\Repository\Manager;
 use Zend\Crypt\Password\Bcrypt;
 use App\Exception\UserException;
 use App\Controller\AbstractController;
 use App\Controller\Exception\ExceptionController;
-use App\Repository\UsersRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Models\ImagesManager;
+use App\Models\UsersManager;
 use Exception;
 
 /**
@@ -26,10 +25,10 @@ class UsersController extends AbstractController
         try {
             // Si le formulaire n'est pas vide et que les conditions d'utilisation ont été accepté
             if (! empty($_POST) && $_POST['condition'] === "on") {
-                
+
                 // Je traite l'image envoyée
                 $image = $this->uplodeFile($_FILES['avatar']);
-                
+
                 // Je procède à la validation des données 
                 $user = new Users();
                 $user->setFirstName($_POST['firstName'])
@@ -40,16 +39,12 @@ class UsersController extends AbstractController
 
                 
                 // Je vérifie si un utilisateur existe déja avec ce email et je renvois une error
-                if ($this->userVerify($user->getEmail())) {
+                if ((new UsersManager())->userVerify($user->getEmail())) {
                     throw new UserException("Cet email est déja utilisé");
                 }
-
-                // Sinon je sauvegarde le nouveau utilisateur
-                /** @var EntityManagerInterface $em */
-                $em = Manager::getInstance()->getEm();
-                $em->persist($user);
-                $em->flush();
-
+                
+                (new UsersManager())->insert($user);
+                
                 $this->addFlash(
                     'success',
                     'Bienvenu parmi nous!'
@@ -77,39 +72,39 @@ class UsersController extends AbstractController
 
                 if (! empty($_POST) && $this->csrfVerify($_POST)) {
     
-                    $user = $this->userVerify(htmlspecialchars($this->getUser()['email']));
+                    $user = (new UsersManager())->userVerify($this->getUser()['email']);
+                    
                     // Je vérifie si l' utilisateur a changé d'email et que ce mail n'existe déja pas dans la base de donnée
-                    if ($user->getEmail() !== $_POST['email'] && empty(! $this->userVerify(htmlspecialchars($_POST['email'])))) {
+                    if ($user['email'] !== $_POST['email'] && empty(! (new UsersManager())->userVerify(htmlspecialchars($_POST['email'])))) {
                         throw new UserException("Cet email est déja utilisé");
                     }
                     
                     // Je récupère l'image précédant
-                    $image = $user->getImages();
-                    
+                    $imageId = (int) $user['images_id'];
+
+                    $image = (new ImagesManager())->getUserImage($imageId);
+
                     // Je traite l'image envoyée s'il en a
                     if ($_FILES['avatar']['error'] === 0) {
                         if ($image !== null) {
-                            unlink(dirname(__DIR__, 2).'/public/img/avatars/'.$image->getName().'.jpg');
+                            unlink(dirname(__DIR__, 2).'/public/img/avatars/'.$image['name'].'.jpg');
                         }
-                        $image = $this->uplodeFile($_FILES['avatar'], $image);
+                        
+                        $this->uplodeFile($_FILES['avatar'], $image);
                     }
-    
-                    // Je procède à la  des types de données 
-                    $user->setFirstName($_POST['firstName'])
+
+                    // Je procède à la validation  des types de données
+                    $user = (new Users())
+                        ->setFirstName($_POST['firstName'])
                         ->setLastName($_POST['lastName'])
                         ->setEmail($_POST['email'])
-                        ->setUpdatedAt(new \DateTime())
-                        ->setImages($image);
+                        ->setUpdatedAt(new \DateTime());
                     
-                    //je sauvegarde l'utilisateur
-                    /** @var EntityManagerInterface $em */
-                    $em = Manager::getInstance()->getEm();
-                    $em->merge($user);
-                    $em->flush();
+                    (new UsersManager())->update($user);
                     
                     // Je met a jour le user dans la session
                     $_SESSION['user'] = [
-                        'id' => $user->getId(),
+                        'id' => $this->getUser()['id'],
                         'token' => uniqid('blog'),
                         'firstName' => $user->getFirstName(),
                         'lastName' => $user->getLastName(),
@@ -150,10 +145,10 @@ class UsersController extends AbstractController
                 if (! empty($_POST) && $this->csrfVerify($_POST)) {
     
                     $bcrypt = new Bcrypt();
-                    $user = $this->userVerify($this->getUser()['email']);
+                    $user = (new UsersManager())->userVerify($this->getUser()['email']);
     
                     //Si il y a un utilisateur et que le mot de passe ne correspond pas
-                    if (! $bcrypt->verify(htmlspecialchars($_POST['lastPassword']), $user->getPassword())) {
+                    if (! $bcrypt->verify(htmlspecialchars($_POST['lastPassword']), $user['password'])) {
                         throw new UserException("L'ancien mot de passe est erronné");
                     }
     
@@ -162,13 +157,11 @@ class UsersController extends AbstractController
                         throw new UserException("Les deux mots de passes sont divergeants");
                     }
     
-                    $user->setPassword(htmlspecialchars($_POST['newPassword']));
+                    $userUpdate = (new Users())
+                    ->setPassword(htmlspecialchars($_POST['newPassword']))
+                    ->setUpdatedAt(new \DateTime());
     
-                    //je sauvegarde l'utilisateur
-                    /** @var EntityManagerInterface $em */
-                    $em = Manager::getInstance()->getEm();
-                    $em->merge($user);
-                    $em->flush();
+                    (new UsersManager())->updatePassword($user['id'], $userUpdate);
 
                     $this->addFlash(
                         'success',
@@ -193,27 +186,36 @@ class UsersController extends AbstractController
      * Permet le upload de fichier jpeg
      *
      * @param FILES $file
+     * @return null|int
      */
-    private function uplodeFile($file, $lastImage = null)
+    private function uplodeFile($file, $lastImage = null): ?int
     {
         try {
             $handle = new \Verot\Upload\Upload($file);
+
             if ($handle->uploaded) {
+
                 $handle->file_new_name_body   = uniqid("avatar");
                 $handle->image_convert = 'jpg';
                 $handle->allowed = array('image/*');
-                $name = $handle->file_new_name_body;
+                $name = $handle->file_new_name_body.'.jpg';
                 $handle->image_resize         = true;
                 $handle->image_x              = 100;
                 $handle->image_ratio_y        = true;
                 $handle->process('../public/img/avatars');
+
                 if ($handle->processed) {
+
+                    $image = (new Images())->setName($name)->setUpdatedAt(new \DateTime());
+
                     if ($lastImage !== null) {
-                        return $lastImage->setName($name)
-                                ->setUpdatedAt(new \DateTime());
+                        return (new ImagesManager())->update($image, $lastImage);
                     }
-                    return (new Images())->setName($name);
+
+                    return (new ImagesManager())->insert($image);
                 }
+
+                return '';
             }
         } catch (Exception $e) {
             return (new ExceptionController())->error500($e->getMessage());
@@ -228,31 +230,36 @@ class UsersController extends AbstractController
     {
         try {
             if (! empty($_POST) && $this->csrfVerify($_POST)) {
+
                 // Je vérifie si un utilisateur a cet email
-                $user = $this->userVerify(htmlspecialchars($_POST['email']));
+                $user = (new UsersManager())->userVerify(htmlspecialchars($_POST['email']));
                 $bcrypt = new Bcrypt();
                 
                 //Si il y a un utilisateur, je vérifie que son mot de passe est valide
-                if (! empty($user) && $bcrypt->verify(htmlspecialchars($_POST['password']), $user->getPassword())) {
+                if (! empty($user) && $bcrypt->verify(htmlspecialchars($_POST['password']), $user['password'])) {
                     
+                    // Start session
+                    session_start();
+
                     // J'initialise le flash bag
                     $_SESSION['flashes'] = [];
+
                     // Je met le user dans la session
                     $_SESSION['user'] = [
-                        'id' => $user->getId(),
+                        'id' => $user['id'],
                         'token' => uniqid('blog'),
-                        'firstName' => $user->getFirstName(),
-                        'lastName' => $user->getLastName(),
-                        'email' => $user->getEmail(),
-                        'role' => $user->getRole(),
+                        'firstName' => $user['first_name'],
+                        'lastName' => $user['last_name'],
+                        'email' => $user['email'],
+                        'role' => $user['role'],
                         'is_connected' => true
                     ];
-                    
+
                     return $this->redirect('/');
                 }
         
                 //Si il y a un utilisateur et que le mot de passe ne correspond pas
-                if (!empty($user) && !$bcrypt->verify(htmlspecialchars($_POST['password']), $user->getPassword())) {
+                if (! empty($user) && !$bcrypt->verify(htmlspecialchars($_POST['password']), $user['password'])) {
                     throw new UserException("Email ou mot de passe erronné");
                 }
     
@@ -278,30 +285,31 @@ class UsersController extends AbstractController
     {
         try {
             if (! empty($_POST) && $this->csrfVerify($_POST)) {
-
                 // Je vérifie si un utilisateur a cet email
-                $user = $this->userVerify(htmlspecialchars($_POST['email']));
+                $user = (new UsersManager())->userVerify(htmlspecialchars($_POST['email']));
                 $bcrypt = new Bcrypt();
-    
+                
                 //Si il y a un utilisateur, je vérifie que son mot de passe est valide
-                if (! empty($user) && $user->getRole() === Users::ROLE_ADMIN && $bcrypt->verify(htmlspecialchars($_POST['password']), $user->getPassword())) {
-                    
+                if (! empty($user) && $user['role'] == Users::ROLE_ADMIN && $bcrypt->verify(htmlspecialchars($_POST['password']), $user['password'])) {
+                    // J'initialise le flash bag
+                    $_SESSION['flashes'] = [];
+
                     // Je met le user dans la session
                     $_SESSION['user'] = [
-                        'id' => $user->getId(),
-                        'token' => uniqid('blog_admin'),
-                        'firstName' => $user->getFirstName(),
-                        'lastName' => $user->getLastName(),
-                        'email' => $user->getEmail(),
-                        'role' => $user->getRole(),
+                        'id' => $user['id'],
+                        'token' => uniqid('blog'),
+                        'firstName' => $user['first_name'],
+                        'lastName' => $user['last_name'],
+                        'email' => $user['email'],
+                        'role' => $user['role'],
                         'is_connected' => true
                     ];
-    
+                    
                     return $this->redirect('/admin');
                 }
         
                 //Si il y a un utilisateur et que le mot de passe ne correspond pas
-                if (!empty($user) && !$bcrypt->verify(htmlspecialchars($_POST['password']), $user->getPassword())) {
+                if (! empty($user) && ! $bcrypt->verify(htmlspecialchars($_POST['password']), $user['password'])) {
                     throw new UserException("Email ou mot de passe erronné");
                 }
     
@@ -336,21 +344,5 @@ class UsersController extends AbstractController
         session_destroy();
 
         return $this->redirect('/');
-    }
-
-    /**
-     * Permet de verifier si un utilisateur existe
-     *
-     * @param string $email
-     */
-    private function userVerify(string $email)
-    {
-        try {
-            /** @var EntityManagerInterface */
-            $em = Manager::getInstance()->getEm();
-            return $em->getRepository('App\Entity\Users')->findOneBy(['email' => htmlspecialchars($email)]);
-        } catch (Exception $e) {
-            return (new ExceptionController())->error500($e->getMessage());
-        }
     }
 }
