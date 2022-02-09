@@ -6,54 +6,34 @@ use App\Entity\Posts;
 use App\Entity\Users;
 use Doctrine\ORM\Mapping as ORM;
 use App\Exception\NotNullException;
-use App\Repository\CommentesRepository;
 
 /**
  * classe entité des commentaires de blogs posts
- * 
- * @ORM\Entity(repositoryClass=CommentesRepository::class)
- * @ORM\Table(name="commentes")
  * 
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
  */
 class Commentes
 {
     /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue
-     *
      * @var integer
      */
     private int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Posts", inversedBy="commentes")
-     * @ORM\JoinColumn(name="post_id", referencedColumnName="id")
-     */
-    private $postId;
+    private int $postId;
+
+    private int $userId;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Users", inversedBy="commentes")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
-     */
-    private $userId;
-
-    /**
-     * @ORM\Column(type="text", name="content")
+     * @var string
      */
     private $content;
 
     /**
-     * @ORM\Column(type="boolean", name="is_valid")
-     *
      * @var boolean
      */
     private bool $isValid = false;
 
     /**
-     * @ORM\Column(type="date", name="created_at")
-     *
      * @var \DateTimeInterface
      */
     private \DateTimeInterface $createdAt;
@@ -76,26 +56,26 @@ class Commentes
     }
 
     /**
-     * @return Posts
+     * @return int
      */ 
-    public function getPostId(): Posts
+    public function getPostId(): int
     {
         return $this->postId;
     }
 
     /**
-     * @return Users
+     * @return int
      */
-    public function getUserId(): Users
+    public function getUserId(): int
     {
         return $this->userId;
     }
 
     /**
-     * @param Posts $post
+     * @param int $post
      * @return self
      */ 
-    public function setPostId(Posts $post): self
+    public function setPostId(int $post): self
     {
         $this->postId = $post;
 
@@ -103,10 +83,10 @@ class Commentes
     }
 
     /**
-     * @param Users $user
+     * @param int $user
      * @return self
      */
-    public function setUserId(Users $user): self
+    public function setUserId(int $user): self
     {
         $this->userId = $user;
 

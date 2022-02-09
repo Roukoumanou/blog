@@ -3,26 +3,25 @@
 namespace App\Controller;
 
 use Exception;
-use App\Entity\Posts;
-use App\Entity\Users;
 use App\Entity\Commentes;
-use App\Repository\Manager;
 use Kilte\Pagination\Pagination;
 use App\Controller\AbstractController;
-use Doctrine\ORM\EntityManagerInterface;
 use App\Controller\Exception\ExceptionController;
+use App\Models\CommentesManager;
+use App\Models\PostsManager;
 
 class BlogsPostsController extends AbstractController
 {
+    /**
+     * @param integer $currentPage
+     */
     public function posts(int $currentPage)
     {
         try {
-            /** @var EntityManagerInterface */
-            $em = Manager::getInstance()->getEm();
+            $sql = 'SELECT * FROM posts WHERE status = :public';
+            $posts = (new PostsManager())->listes($sql);
 
-            $repo = $em->getRepository("App\Entity\Posts");
-            
-            $totalItems = count($repo->findBy(['status' => Posts::PUBLISHED]));
+            $totalItems = count($posts);
             $itemsPerPage = 2;
             $neighbours = 4;
 
@@ -30,8 +29,7 @@ class BlogsPostsController extends AbstractController
             $limit = $pagination->limit();
             $offset = $pagination->offset();
 
-            $posts = $repo->findBy(
-                ['status' => Posts::PUBLISHED], ['id' => 'DESC'], $limit, $offset);
+            $posts = (new PostsManager())->pagination($sql, $limit, $offset);
 
             $pages = $pagination->build();
             
@@ -49,34 +47,26 @@ class BlogsPostsController extends AbstractController
     public function showPost(int $id)
     {
         try {
-            /** @var EntityManagerInterface */
-            $em = Manager::getInstance()->getEm();
+            $post = (new PostsManager())->getPost($id);
+            $commentes = (new CommentesManager())->getCommentes($post['id']);
 
-            $post = $em->getRepository("App\Entity\Posts")->findOneBy(['id' => $id]);
-            $commentes = $em->getRepository("App\Entity\Commentes")->findBy([
-                'isValid' => true,
-                'postId' => $post
-            ], ['id' => 'DESC'], 5) ;
-            
             if (! empty($_POST) && $_POST['_token'] === $this->getUser()['token']) {
                 
-                $user = $em->getRepository("App\Entity\Users")->findOneBy(['id' => $this->getUser()['id']]);
+                $user = $this->getUser()['id'];
                 $comment = new Commentes();
 
-                $comment->setPostId($post)
+                $comment->setPostId($post['id'])
                     ->setUserId($user)
                     ->setContent($_POST['message']);
-                
-                $post->addCommentes($comment);
-                $em->persist($comment);
-                $em->flush();
+
+                (new CommentesManager())->addCommentes($comment);
 
                 $this->addFlash(
                     'success',
                     'Merci pour le commentaire ! il est en attente de validation !'
                 );
 
-                return $this->redirect('/post-'.$post->getId());
+                return $this->redirect('/post-'.$post['id']);
             }
 
         } catch (Exception $e) {
@@ -84,7 +74,7 @@ class BlogsPostsController extends AbstractController
         }
 
         return $this->render('show_post.html.twig', [
-            'title' => $post->getTitle(),
+            'title' => $post['title'],
             'post'  => $post,
             'commentes' => $commentes
         ]);

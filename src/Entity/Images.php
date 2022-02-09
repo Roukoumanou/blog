@@ -1,41 +1,28 @@
 <?php
 
 namespace App\Entity;
-use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
- * @ORM\Entity
- * @ORM\Table(name="images")
  */
 class Images
 {
     /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue
-     *
      * @var integer
      */
     private int $id;
 
     /**
-     * @ORM\Column(type="string", nullable=true)
-     *
      * @var string
      */
     private string $name;
 
     /**
-     * @ORM\Column(type="date", name="created_at", nullable=true)
-     *
      * @var \DateTimeInterface
      */
     private \DateTimeInterface $createdAt;
 
     /**
-     * @ORM\Column(type="date", name="updated_at", nullable=true)
-     *
      * @var \DateTimeInterface
      */
     private \DateTimeInterface $updatedAt;
