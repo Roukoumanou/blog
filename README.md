@@ -1,28 +1,31 @@
 # projet5 Création d'un blog en php
 
-Require php 7.2 >=
+Require 
+php 7.2 >=
+mysql
+server web
 
-RUN composer 
+# Initialisation Configuration
+create at the root of the project a file named .env with the following informations
 
-Create the .env file You will need to set the following global variables:
-
-# ##> Database connect <## #
+# for Database connect
 DB_NAME=...
 DB_USER=...
 DB_PASS=...
 DB_HOST=...
 DB_DRIVER=...
-# ##! Database connect !## #
+# Database connect
 
-# ##> Mailler connect <## #
+# for send Mailler connect
 MAIL_USERNAME=...
 MAIL_PASSWORD=...
-# ##! Mailler connect !## #
+# Mailler connect
 
-# RUN this commande for create database
-vendor/bin/doctrine orm:schema-tool:create
+import the sql file into your database
 
-#
+Update the project packages with the  <<composer install>> command
+
+# Deploye
 RUN php -S localhost:8000 -t public
 
 
