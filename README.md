@@ -1,9 +1,9 @@
 # projet5 Création d'un blog en php
 
 Require 
-php 7.2 >=
-mysql
-server web
+php 7.2 >= 
+;mysql 
+;server web 
 
 # Initialisation Configuration
 create at the root of the project a file named .env with the following informations
