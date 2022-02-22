@@ -2,11 +2,12 @@
 
 namespace App\Controller\Administrator;
 
+use Exception;
+use App\Models\CommentsManager;
 use Kilte\Pagination\Pagination;
 use App\Controller\AbstractController;
 use App\Controller\Exception\ExceptionController;
-use App\Models\CommentesManager;
-use Exception;
+use App\Entity\Comments;
 
 class AdminCommentsController extends AbstractController
 {
@@ -16,16 +17,15 @@ class AdminCommentsController extends AbstractController
     public function comments(int $currentPage)
     {
         try {
-            $commentes = (new CommentesManager())->getInvalidCommentes();
+            $comments = (new CommentsManager())->getInvalidComments();
 
-            $totalItems = count($commentes);
+            $totalItems = count($comments);
             $itemsPerPage = 2;
             $neighbours = 4;
 
-            $pagination = new Pagination($totalItems, $currentPage, $itemsPerPage, $neighbours);
-            $limit = $pagination->limit();
-            $offset = $pagination->offset();
-            $commentes = (new CommentesManager())->pagination($limit, $offset);
+            $pagination = new Pagination($totalItems, $currentPage, Comments::ITEMS_PER_PAGE, Comments::NEIGHBOURS);
+            
+            $comments = (new CommentsManager())->pagination($pagination->limit(), $pagination->offset());
 
             $pages = $pagination->build();
             
@@ -35,7 +35,7 @@ class AdminCommentsController extends AbstractController
 
         return $this->render('admin/comments.html.twig', [
             'title' => 'Liste des commentaires non validés',
-            'comments' => $commentes,
+            'comments' => $comments,
             'pages' => $pages
         ]);
     }
@@ -45,7 +45,7 @@ class AdminCommentsController extends AbstractController
      */
     public function comment(int $id)
     {
-        $comment = (new CommentesManager())->getComment($id);
+        $comment = (new CommentsManager())->getComment($id);
 
         return $this->render('admin/comment.html.twig', [
             'title' => 'Commentaire a valider n° '.$comment['id'],
@@ -60,7 +60,7 @@ class AdminCommentsController extends AbstractController
     {
         if (! empty($_POST) && $this->csrfVerify($_POST)) {
             try {
-                (new CommentesManager())->valided($id);
+                (new CommentsManager())->valided($id);
 
                 $this->addFlash(
                     'success',

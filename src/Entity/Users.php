@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Entity\Commentes;
+use App\Entity\Comments;
 use Zend\Crypt\Password\Bcrypt;
 use App\Exception\NotNullException;
 
@@ -63,7 +63,7 @@ class Users
 
     private int $images;
 
-    private $commentes;
+    private $comments;
 
     public function __construct()
     {
@@ -284,11 +284,12 @@ class Users
     }
 
     /**
-     * @param Commentes $commente
+     * @param Comments $comment
      * @return self
      */
-    public function addCommentes(Commentes $commente): self
+    public function addCommentes(Comments $comment): self
     {
+        $this->comments = $comment;
 
         return $this;
     }

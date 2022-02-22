@@ -86,7 +86,7 @@ class UsersController extends AbstractController
                     // Je traite l'image envoyée s'il en a
                     if ($_FILES['avatar']['error'] === 0) {
                         if ($image !== null) {
-                            unlink(dirname(__DIR__, 2).'/public/img/avatars/'.$image['name'].'.jpg');
+                            unlink(dirname(__DIR__, 2).'/public/img/avatars/'.$image['name']);
                         }
                         
                         $this->uplodeFile($_FILES['avatar'], $image);

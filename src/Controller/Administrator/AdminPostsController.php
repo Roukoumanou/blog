@@ -18,18 +18,13 @@ class AdminPostsController extends AbstractController
     public function postList(int $currentPage)
     {
         try {
-            $sql = 'SELECT * FROM posts';
-            $posts = (new PostsManager())->listes($sql);
+            $posts = (new PostsManager())->admin();
  
             $totalItems = count($posts);
-            $itemsPerPage = 2;
-            $neighbours = 4;
             
-            $pagination = new Pagination($totalItems, $currentPage, $itemsPerPage, $neighbours);
-            $limit = $pagination->limit();
-            $offset = $pagination->offset();
+            $pagination = new Pagination($totalItems, $currentPage, Posts::ITEMS_PER_PAGE, Posts::NEIGHBOURS);
             
-            $posts = (new PostsManager())->pagination($sql, $limit, $offset, Users::ROLE_ADMIN);
+            $posts = (new PostsManager())->pagination($pagination->limit(), $pagination->offset(), Users::ROLE_ADMIN);
             
             $pages = $pagination->build();
             

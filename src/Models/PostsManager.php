@@ -8,10 +8,20 @@ use App\Controller\AbstractController;
 
 class PostsManager extends AbstractController
 {
-    public function listes($sql)
+    public function admin()
     {
         $em = $this->getDB();
-        $result = $em->prepare($sql);
+        $result = $em->prepare('SELECT * FROM posts');
+        $result->execute();
+        $posts = $result->fetchAll();
+
+        return $posts;
+    }
+
+    public function lists()
+    {
+        $em = $this->getDB();
+        $result = $em->prepare('SELECT * FROM posts WHERE status = :public');
         $result->execute([':public' => Posts::PUBLISHED]);
         $posts = $result->fetchAll();
 
@@ -53,20 +63,23 @@ class PostsManager extends AbstractController
     public function delete(int $id)
     {
         $em = $this->getDB();
-        $comment = $em->prepare("DELETE FROM commentes WHERE post_id = :id");
+        $comment = $em->prepare("DELETE FROM comments WHERE post_id = :id");
         $comment->execute(['id' => $id]);
 
         $post = $em->prepare("DELETE FROM posts WHERE id = :id");
         $post->execute([':id' => $id]);
     }
 
-    public function pagination($sql, $limit, $offset, $user = null)
+    public function pagination($limit, $offset, $user = null)
     {
-        $req = $this->getDB()->prepare($sql.' ORDER BY id DESC LIMIT '.$limit.' OFFSET '.$offset);
+        $req = $this->getDB()->prepare('SELECT * FROM posts WHERE status = :public ORDER BY id DESC LIMIT '.$limit.' OFFSET '.$offset);
 
         if ($user === Users::ROLE_ADMIN) {
+            $req = $this->getDB()->prepare('SELECT * FROM posts ORDER BY id DESC LIMIT '.$limit.' OFFSET '.$offset);
+
             $req->execute();
         }
+
         $req->execute([':public' => Posts::PUBLISHED]);
 
         $posts = $req->fetchAll();
