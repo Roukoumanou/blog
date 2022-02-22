@@ -21,7 +21,7 @@ MAIL_USERNAME=...
 MAIL_PASSWORD=...
 # Mailler connect
 
-import the sql file into your database
+import the sql file <<p5test.sql>> into your database
 
 Update the project packages with the  <<composer install>> command
 
