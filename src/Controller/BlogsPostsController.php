@@ -3,11 +3,12 @@
 namespace App\Controller;
 
 use Exception;
-use App\Entity\Commentes;
+use App\Entity\Comments;
 use Kilte\Pagination\Pagination;
 use App\Controller\AbstractController;
 use App\Controller\Exception\ExceptionController;
-use App\Models\CommentesManager;
+use App\Entity\Posts;
+use App\Models\CommentsManager;
 use App\Models\PostsManager;
 
 class BlogsPostsController extends AbstractController
@@ -18,18 +19,13 @@ class BlogsPostsController extends AbstractController
     public function posts(int $currentPage)
     {
         try {
-            $sql = 'SELECT * FROM posts WHERE status = :public';
-            $posts = (new PostsManager())->listes($sql);
+            $posts = (new PostsManager())->lists();
 
             $totalItems = count($posts);
-            $itemsPerPage = 2;
-            $neighbours = 4;
 
-            $pagination = new Pagination($totalItems, $currentPage, $itemsPerPage, $neighbours);
-            $limit = $pagination->limit();
-            $offset = $pagination->offset();
+            $pagination = new Pagination($totalItems, $currentPage, Posts::ITEMS_PER_PAGE, Posts::NEIGHBOURS);
 
-            $posts = (new PostsManager())->pagination($sql, $limit, $offset);
+            $posts = (new PostsManager())->pagination($pagination->limit(), $pagination->offset());
 
             $pages = $pagination->build();
             
@@ -48,18 +44,18 @@ class BlogsPostsController extends AbstractController
     {
         try {
             $post = (new PostsManager())->getPost($id);
-            $commentes = (new CommentesManager())->getCommentes($post['id']);
+            $commentes = (new CommentsManager())->getComments($post['id']);
 
             if (! empty($_POST) && $_POST['_token'] === $this->getUser()['token']) {
                 
                 $user = $this->getUser()['id'];
-                $comment = new Commentes();
+                $comment = new Comments();
 
                 $comment->setPostId($post['id'])
                     ->setUserId($user)
                     ->setContent($_POST['message']);
 
-                (new CommentesManager())->addCommentes($comment);
+                (new CommentsManager())->addComments($comment);
 
                 $this->addFlash(
                     'success',

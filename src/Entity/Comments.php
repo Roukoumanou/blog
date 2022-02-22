@@ -2,9 +2,6 @@
 
 namespace App\Entity;
 
-use App\Entity\Posts;
-use App\Entity\Users;
-use Doctrine\ORM\Mapping as ORM;
 use App\Exception\NotNullException;
 
 /**
@@ -12,8 +9,11 @@ use App\Exception\NotNullException;
  * 
  * @author Amidou Roukoumanou <roukoumanouamidou@gmail.com>
  */
-class Commentes
+class Comments
 {
+    public const ITEMS_PER_PAGE = 2;
+    public const NEIGHBOURS = 4;
+    
     /**
      * @var integer
      */

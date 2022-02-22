@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Entity\Commentes;
 use App\Exception\NotNullException;
 
 /**
@@ -14,6 +13,9 @@ class Posts
 {
     public const PUBLISHED = 20;
     public const DRAFT = 30;
+
+    public const ITEMS_PER_PAGE = 2;
+    public const NEIGHBOURS = 4;
 
     /**
      * @var integer
