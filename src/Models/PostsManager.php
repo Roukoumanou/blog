@@ -72,10 +72,10 @@ class PostsManager extends AbstractController
 
     public function pagination($limit, $offset, $user = null)
     {
-        $req = $this->getDB()->prepare('SELECT * FROM posts WHERE status = :public ORDER BY id DESC LIMIT '.$limit.' OFFSET '.$offset);
+        $req = $this->getDB()->prepare("SELECT * FROM posts WHERE status = :public ORDER BY id DESC LIMIT $limit OFFSET $offset");
 
         if ($user === Users::ROLE_ADMIN) {
-            $req = $this->getDB()->prepare('SELECT * FROM posts ORDER BY id DESC LIMIT '.$limit.' OFFSET '.$offset);
+            $req = $this->getDB()->prepare("SELECT * FROM posts ORDER BY id DESC LIMIT $limit OFFSET $offset");
 
             $req->execute();
         }
